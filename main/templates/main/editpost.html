@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<!-- 포스트를 작성하는 페이지 -->
+{% load static %} 
+<html>
+<head>
+    <title>포스트 작성</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{% static 'css/editpost.css' %}">
+    <script src="https://cdn.ckeditor.com/ckeditor5/35.3.2/classic/ckeditor.js"></script>
+    <script> 
+        // ckeditor의 value를 가져와서 유효성 검사를 하려면 인스턴스를 생성해야 하는데 .then을 이용하여 에디터가 실행될 때 인스턴스를 생성한 후 그 인스턴스를 이용하면 된다..
+        // 참고한 레퍼런스 https://stackoverflow.com/questions/47013985/how-to-get-value-of-ckeditor-5
+        let myEditor;
+
+        document.addEventListener("DOMContentLoaded", function() { 
+            ClassicEditor 
+                .create(document.querySelector('#editor'), {
+                    ckfinder: { 
+                        uploadUrl: '{% url "ckeditor_upload" %}' },
+                    language: 'ko', 
+                    toolbar: {
+                        items: ['heading', 
+                        '|', 
+                        'bold', 'italic', 'link',
+                        '|',  
+                        'bulletedList','numberedList',
+                        'fontfamily', 'fontsize', 'fontColor', 'fontBackgroundColor',
+                        'blockQuote', 'insertTable', 'undo', 'redo', 'imageUpload', "imageTextAlternative"
+                        ],
+                        shouldNotGroupWhenFull: false
+                    }
+                })
+                // ckeditor 초기화가 성공하면 인스턴스 생성
+                .then( editor => {
+                    myEditor = editor;
+                } )
+
+                .catch(error => { 
+                    console.error(error); 
+            });
+        });
+
+        function validationCheck() {
+            if (createpostform.post_title.value == "") {
+                alert("제목을 입력해주세요");
+                return false;
+            }
+
+            else if (myEditor.getData() == "") {
+                alert("내용을 입력해주세요");
+                return false;
+            }
+        }
+    </script>
+    <style>
+        .ck-editor__editable_inline {
+            min-height: 400px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 몰랐는데 form 태그를 사용하면 컨테이너 역할 말고도 내부 input 태그에 일괄로 작업을 처리할 수 있어 유연하다! -->
+     <header>
+        <div>포스트를 작성하세요</div>
+     </header>
+     <div id = "coneditform">
+        <div id = "editformarea">
+            <form id="createpostform" name = "createpostform" class="form-inline center" method="POST">
+                {% csrf_token %}
+                {{ form.post_editor_uid }}
+                {{ form.post_id }}
+                <label for="post_title" readonly>제목</label>
+                <br>
+                <input id="post_title" type="text" name="post_title" placeholder="제목을 입력해주세요">
+                <br>
+                <label for="post_contents">내용</label>
+                <br>
+                <textarea id= "editor" name="post_contents" placeholder="내용을 입력해주세요"></textarea>
+                <br>
+                <div id = "btneditpost">
+                    <button type="submit" name="submitBtn" onclick="return validationCheck()">확인</button>
+                    <button type="button" name="formSendCancel" onclick="if (confirm('작성을 취소하시겠습니까?')) location.replace('/post/');">취소</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,107 @@
+@font-face {
+    font-family: 'Gyeonggi_Batang_Regular';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2410-3@1.0/Batang_Regular.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Gyeonggi_Title_Light';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2410-3@1.0/Title_Light.woff') format('woff');
+    font-weight: 300;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Gyeonggi_Title_Medium';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2410-3@1.0/Title_Medium.woff') format('woff');
+    font-weight: 500;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Gyeonggi_Title_Bold';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2410-3@1.0/Title_Bold.woff') format('woff');
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Gyeonggi_TitleV';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2410-3@1.0/TitleV.woff') format('woff');
+    font-weight: 800;
+    font-style: normal;
+}
+
+body {
+    font-family: 'Gyeonggi_Batang_Regular';
+}
+
+header {
+    padding: 30px;
+    text-align: center;
+    font-family: 'Gyeonggi_Title_Medium';
+    font-size: 30px;
+}
+
+#editformarea {
+    width: 50%;
+}
+
+#coneditform {
+    display: flex;
+    justify-content: center;
+}
+
+#btneditpost {
+    display: flex;
+    gap: 10px;
+}
+
+label {
+    font-size: 150%;
+}
+
+form {
+    display: flex; 
+    flex-direction: column; 
+    gap: 3px; 
+    width: 100%;
+    text-align: center;
+}
+
+input {
+    width: 100%;
+    height: 30px;
+    font-size: 18px;
+    font-family: 'Gyeonggi_Title_Light';
+    border-radius: 5px;
+}
+
+textarea {
+    width: 100%;
+    height: 300px;
+    border-radius: 5px;
+    font-size: 18px;
+    font-family: 'Gyeonggi_Title_Light';
+    resize: none;
+}
+
+button {
+    margin-top: 0.5%;
+    border-radius: 5px;
+    border: 1px;
+    cursor: pointer;
+    width: 100px;
+    height: 35px;
+    font-family: Gyeonggi_Batang_Regular;
+    font-size: 17px;
+}
+
+button[name="submitBtn"] {
+    background-color: rgb(90, 171, 238);
+}
+
+button[name="submitBtn"]:hover { 
+    background-color: rgb(79, 151, 209);
+}

@@ -1,0 +1,81 @@
+@font-face {
+    font-family: 'Gyeonggi_Batang_Regular';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2410-3@1.0/Batang_Regular.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Gyeonggi_Title_Light';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2410-3@1.0/Title_Light.woff') format('woff');
+    font-weight: 300;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Gyeonggi_Title_Medium';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2410-3@1.0/Title_Medium.woff') format('woff');
+    font-weight: 500;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Gyeonggi_Title_Bold';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2410-3@1.0/Title_Bold.woff') format('woff');
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Gyeonggi_TitleV';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2410-3@1.0/TitleV.woff') format('woff');
+    font-weight: 800;
+    font-style: normal;
+}
+
+body {
+    font-family: 'Gyeonggi_Batang_Regular';
+}
+
+posttitle {
+    font-family: 'Gyeonggi_Title_Medium';
+    font-size: 30px;
+    font-weight: 300;
+}
+
+header {
+    text-align: center;
+    font-family: 'Gyeonggi_Title_Medium';
+    font-size: 30px;
+    padding-top: 1%;
+}
+
+button[name="postbutton"] {
+    margin-top: 0.5%;
+    border-radius: 10px;
+    border: 1px;
+    cursor: pointer;
+    width: 80px;
+    height: 35px;
+    font-family: Gyeonggi_Batang_Regular;
+    font-size: 17px;
+}
+
+#postbtnbar {
+    display: flex;
+    padding-right: 0.2%;
+    justify-content: end;
+}
+
+#postlist {
+    width: 50%;
+}
+
+#postlist img { 
+    max-width: 100%;
+}
+
+#postwidget {
+    display: flex;
+    justify-content: center;
+}

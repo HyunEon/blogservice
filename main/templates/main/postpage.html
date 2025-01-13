@@ -1,13 +1,44 @@
 <!DOCTYPE html>
+<!-- static 파일에 있는 모든 리소스를 불러옴 -->
+<!-- todo: 포스트 뷰 페이지에서 리스트로 보여주는 형태가 아닌 메인 페이지에서 포스트를 클릭 시 포스트룰 로드하도록 분리 -->
+{% load static %} 
 <html>
 <head>
     <title>내 글</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
-    <h1>포스트</h1>
-        <div>
-            <h2>{{ post_title }}</h2>
-            <p>{{ post_contents }}</p>
+    <header>
+        포스트 목록
+    </header>
+    <div id= "postbtnbar">
+        <button name= "postbutton" type="button" onclick="location.replace('/editpost/');">✏️작성</button>
+    </div>
+    <div id= "postwidget">
+        <div id= "postlist">
+        {% if not posts %}
+            <h1 style="text-align: center">작성된 콘텐츠가 없습니다.</h1>
+        {% endif %}
+        {% for post in posts%}
+            <div>
+                <posttitle>
+                    <p>{{ post.post_title }}</p>
+                </posttitle>
+                <p>{{ post.post_date }}</p>
+                <hr>
+            </div>
+            <div>
+                {{ post.post_contents | safe}}
+            </div>
+            {% endfor %}
         </div>
+    </div>
+    <script src="static/js/comments.js" type="text/javascripts">
+    </script>
+    <footer>
+        <div>
+        </div>
+    </footer>
 </body>
 </html>
