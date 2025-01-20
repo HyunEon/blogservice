@@ -4,10 +4,31 @@ from django.db import models
 # 관리자 페이지에서 모델을 관리하고 싶다면 admin.py에 모델 정보를 추가해줘야 함.
 
 # Create your models here.
+class BlogInfo(models.Model):
+    blog_id = models.CharField(max_length=100, help_text='블로그 id https://ex.com/blog/-------/')
+    blog_title = models.CharField(max_length=20, db_index= True, help_text='블로그 제목')
+    blog_user = models.CharField(max_length=20, help_text='블로그 uid')
+
+    def __str__(self):
+        """String for representing the MyModel object (in Admin site etc.)."""
+        return self.blog_title
+class BlogCategory(models.Model):
+    category_index = models.IntegerField(primary_key=True, auto_created=True, help_text='카테고리 인덱스')
+    category_id = models.CharField(max_length=100, help_text='카테고리 id')
+    category_name = models.CharField(max_length=20, default='내 글', db_index= True, help_text='카테고리 제목')
+    category_for = models.CharField(max_length=100, help_text='카테고리가 적용될 블로그 주소')
+    category_isdepth = models.BooleanField(help_text='뎁스가 적용된 카테고리 여부 확인')
+    category_depth_for = models.CharField(max_length=100, null=True, blank=True, help_text='뎁스가 적용된 카테고리의 부모 카테고리 id')
+
+    def __str__(self):
+        """String for representing the MyModel object (in Admin site etc.)."""
+        return self.category_id
+    
 class PostContents(models.Model):
     post_index = models.IntegerField(primary_key=True, null=False, auto_created=True, help_text='블로그 포스트 인덱스')
+    post_category_for = models.CharField(max_length=100, default='dd', help_text='카테고리 id')
     post_id = models.CharField(max_length=100, help_text='블로그 포스트 id 아마 GUID로 설정될 듯')
-    post_title = models.CharField(max_length=20, db_index= True, help_text='블로그 포스트 제목 필드')
+    post_title = models.CharField(max_length=20, null = False, db_index= True, help_text='블로그 포스트 제목 필드')
     post_contents =  models.TextField(null = False, help_text='블로그 포스트 내용 필드')
     post_date = models.DateTimeField(auto_now_add=True, help_text='블로그 포스트 날짜')
     post_editdate = models.DateTimeField(auto_now=True, help_text='블로그 포스트 수정된 날짜') # 필요 있을진 모르겠음
@@ -31,7 +52,9 @@ class PostComments(models.Model):
         """String for representing the MyModel object (in Admin site etc.)."""
         return self.comment_postadress
     
-# 미디어(사진, 동영상, 파일 포함)가 업로드되는 테이블.. 을 따로 만들었으나 CKeditor를 사용해보니 플러그인 단에서 경로만 지정해주면 자체적으로 지원되는 것 같다.
+
+# 미디어(사진, 동영상, 파일 포함)가 업로드되는 테이블.. 을 따로 만들었으나 CKeditor를 사용해보니 플러그인 단에서 경로만 지정해주면 자체적으로 지원되는 것 같다. 
+# 추후 동영상이나 이모티콘 같은 기능에서 사용하면 좋을 것 같다.
 class MediaContent(models.Model):
     media_index = models.IntegerField(primary_key=True, auto_created=True, help_text='미디어 인덱스')
     media_id = models.CharField(max_length=100, help_text='미디어 id')

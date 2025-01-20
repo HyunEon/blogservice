@@ -34,7 +34,47 @@
 }
 
 body {
-    font-family: 'Gyeonggi_Batang_Regular';
+    font-family: 'Gyeonggi_Title_Light';
+    background-color: #F6F7F9;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+header {
+    display: flex;
+    justify-content: center;
+    padding: 0.5%;
+    top: 0;
+    width: 70%;
+    background-color: #F6F7F9;
+    position: fixed;
+    text-align: center;
+    font-size: 30px;
+}
+
+#mainwidget {
+    display: flex;
+    justify-content: center;
+    width: 80%;
+    margin-top: 5%;
+    padding: 0.5%;
+}
+
+input[name="post_searchbox"] {
+    width: 100%;
+    font-size: 13px;
+    font-family: 'Gyeonggi_Title_Light';
+    background-color: transparent;
+    border: none;
+    border-radius: 15px;
+}
+
+input[name="post_searchbox"]:hover, 
+input[name="post_searchbox"]:focus { 
+    outline: none; /* 파란색 강조 표시 제거 */ 
+    box-shadow: none; /* 그림자 제거 (옵션) */
 }
 
 posttitle {
@@ -43,22 +83,42 @@ posttitle {
     font-weight: 300;
 }
 
-header {
-    text-align: center;
-    font-family: 'Gyeonggi_Title_Medium';
-    font-size: 30px;
-    padding-top: 1%;
-}
-
 button[name="postbutton"] {
     margin-top: 0.5%;
     border-radius: 10px;
     border: 1px;
     cursor: pointer;
-    width: 80px;
+    width: 100px;
     height: 35px;
-    font-family: Gyeonggi_Batang_Regular;
+    font-family: Gyeonggi_Title_Light;
     font-size: 17px;
+}
+
+button[name="postbutton"] {
+    background-color: rgb(90, 171, 238);
+}
+
+button[name="postbutton"]:hover { 
+    background-color: rgb(79, 151, 209);
+}
+
+button[name="searchbtn"] { 
+    width: 30px;
+    background-color: transparent;
+    cursor: pointer;
+    border: none;
+    border-radius: 15px;
+}
+
+.searchbox_bar {
+    display: flex;
+    border-radius: 15px;
+    background-color: white;
+}
+
+.header_title {
+    margin-right: auto;
+    padding-left: 9%;
 }
 
 #postbtnbar {
@@ -67,15 +127,56 @@ button[name="postbutton"] {
     justify-content: end;
 }
 
-#postlist {
+#postwidget {
+    display: flex;
+    justify-content: center;
     width: 50%;
+    padding-left: 1%;
+    padding-right: 1%;
+}
+
+#postlist {
+    padding: 3%;
+    width: 100%;
+    background-color: white;
+    border-radius: 20px;
 }
 
 #postlist img { 
     max-width: 100%;
 }
 
-#postwidget {
-    display: flex;
-    justify-content: center;
+#postcategorywidget {
+    width: 15%;
+    height: 30%;
+    background-color: white;
+    border-radius: 20px;
+}
+
+#postcategorylist {
+    height: auto;
+    font-size: 17px;
+    text-align: center;
+    padding: 3%;
+}
+
+#postcategorylist:hover {
+    cursor: pointer;
+    animation: alternate;
+    background-color: lightgray;
+    border-radius: 20px;
+}
+
+#postcategorylist_depth {
+    height: auto;
+    font-size: 17px;
+    text-align: center;
+    text-indent: 20px;
+    padding: 3%;
+}
+
+#postcategorylist_depth:hover {
+    cursor: pointer;
+    background-color: lightgray;
+    border-radius: 20px;
 }

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <!-- static 파일에 있는 모든 리소스를 불러옴 -->
 <!-- todo: 포스트 뷰 페이지에서 리스트로 보여주는 형태가 아닌 메인 페이지에서 포스트를 클릭 시 포스트룰 로드하도록 분리 -->
+<!-- div id = 이 페이지에서 한 번만 사용 가능, div class= 재사용 가능-->
 {% load static %} 
 <html>
 <head>
@@ -10,31 +11,52 @@
 </head>
 <body>
     <header>
-        포스트 목록
+        <div class="header_title">
+            블로그
+        </div>
+        <div class = "searchbox_bar">
+            <button type="submit" name="searchbtn" onclick="">🔍</button>
+            <input id="searchbox" type="text" name="post_searchbox" placeholder="검색할 내용을 입력해주세요">
+        </div>
     </header>
-    <div id= "postbtnbar">
-        <button name= "postbutton" type="button" onclick="location.replace('/editpost/');">✏️작성</button>
-    </div>
-    <div id= "postwidget">
-        <div id= "postlist">
-        {% if not posts %}
-            <h1 style="text-align: center">작성된 콘텐츠가 없습니다.</h1>
-        {% endif %}
-        {% for post in posts%}
-            <div>
-                <posttitle>
-                    <p>{{ post.post_title }}</p>
-                </posttitle>
-                <p>{{ post.post_date }}</p>
-                <hr>
-            </div>
-            <div>
-                {{ post.post_contents | safe}}
-            </div>
+    <div id= "mainwidget"> <!--<ui>, <li>로 카테고리 개선해보자-->
+        <div id= "postcategorywidget">
+            {% for category in categorys%}
+            {% if category.category_isdepth %}
+                <div id="postcategorylist_depth">
+                    ↘️ {{ category.category_name }}
+                </div>
+            {% else %}
+                <div id="postcategorylist">
+                    {{ category.category_name }}
+                </div>
+                {% endif %}
             {% endfor %}
+        </div>    
+        <div id= "postwidget">
+            <div id= "postlist">
+                {% if not posts %}
+                <h1 style="text-align: center">작성된 콘텐츠가 없습니다.</h1>
+                {% endif %}
+                {% for post in posts%}
+                <div>
+                    <posttitle>
+                        <p>{{ post.post_title }}</p>
+                    </posttitle>
+                    <p>{{ post.post_date }}</p>
+                    <hr>
+                </div>
+                <div>
+                    {{ post.post_contents | safe}}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        <div id= "postbtnbar">
+            <button name= "postbutton" type="button" onclick="location.replace('/editpost/');">✏️ 작성</button>
         </div>
     </div>
-    <script src="static/js/comments.js" type="text/javascripts">
+    <script src="{% static 'js/post.js' %}" type="text/javascript">
     </script>
     <footer>
         <div>
