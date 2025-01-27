@@ -31,7 +31,7 @@ class PostContents(models.Model):
     post_title = models.CharField(max_length=20, null = False, db_index= True, help_text='블로그 포스트 제목 필드')
     post_contents =  models.TextField(null = False, help_text='블로그 포스트 내용 필드')
     post_date = models.DateTimeField(auto_now_add=True, help_text='블로그 포스트 날짜')
-    post_editdate = models.DateTimeField(auto_now=True, help_text='블로그 포스트 수정된 날짜') # 필요 있을진 모르겠음
+    post_editdate = models.DateTimeField(null= True, help_text='블로그 포스트 수정된 날짜')
     post_editor_uid = models.CharField(max_length=20, help_text='포스트 작성자 uid')
 
     def __str__(self):
@@ -40,13 +40,14 @@ class PostContents(models.Model):
     
 class PostComments(models.Model):
     comment_index = models.IntegerField(primary_key=True, auto_created=True, help_text='댓글 인덱스')
-    comment_id = models.CharField(max_length=100, help_text='댓글 id 형식은 GUID + 숫자 4자리')
+    comment_order = models.IntegerField(null=False, default=1, help_text='댓글/대댓글을 정렬하기 위한 순서이자 묶어주기 위한 그룹 대댓글의 경우 같은 order로 묶고 생성 날짜로 정렬한다')
+    comment_id = models.CharField(max_length=100, help_text='댓글 id 형식은 GUID')
     comment_postadress = models.CharField(max_length=50, help_text='댓글이 달린 포스트 주소')
     comment_editor_uid = models.CharField(max_length=20, help_text='댓글 작성자 uid')
     comment_contents = models.TextField(null = False, help_text='댓글 내용')
     comment_date = models.DateTimeField(auto_now_add=True, help_text='댓글 작성한 날짜')
     comment_isreply = models.BooleanField(help_text='답글 여부 확인')
-    comment_replyto = models.CharField(max_length=100, null=True, blank= True, help_text='답글 주소 id, 댓글 ID를 여기다 넣음')
+    comment_replyto = models.CharField(max_length=100, null=True, blank= True, help_text='답글 주소 id, 댓글 ID를 여기다 넣음, 근데 order 스키마로 충분한 것 같아 제거해야 하나 고민중')
 
     def __str__(self):
         """String for representing the MyModel object (in Admin site etc.)."""

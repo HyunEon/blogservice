@@ -33,75 +33,57 @@
     font-style: normal;
 }
 
-body {
-    font-family: 'Gyeonggi_Title_Light';
-}
-
-header {
-    padding: 30px;
-    text-align: center;
-    font-family: 'Gyeonggi_Title_Medium';
-    font-size: 30px;
-}
-
-#editformarea {
-    width: 50%;
-}
-
-#coneditform {
+#postdetail_mainwidget {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    /*justify-content: center;*/
+    align-items: center;
+    width: 80%;
+    margin-top: 5%;
+    padding: 0.5%;
+    padding-bottom: 10%;
+    min-height: calc(100vh - 30px);
 }
 
-#btneditpost {
+.updatedeletebtn_widget {
     display: flex;
-    gap: 10px;
+    align-items: center;
 }
 
-label {
-    font-size: 150%;
+button[name="editbutton"] {
+    background-color: rgb(90, 171, 238);
 }
 
-form {
-    display: flex; 
-    flex-direction: column; 
-    gap: 3px; 
-    width: 100%;
-    text-align: center;
+button[name="editbutton"]:hover { 
+    background-color: rgb(79, 151, 209);
 }
 
-input {
-    width: 100%;
-    height: 30px;
-    font-size: 18px;
-    font-family: 'Gyeonggi_Title_Light';
-    border-radius: 5px;
+button[name="deletebutton"] {
+    background-color: rgb(90, 171, 238);
 }
 
-textarea {
-    width: 100%;
-    height: 300px;
-    border-radius: 5px;
-    font-size: 18px;
-    font-family: 'Gyeonggi_Title_Light';
-    resize: none;
+button[name="deletebutton"]:hover { 
+    background-color: rgb(79, 151, 209);
 }
 
-button {
+button[name="editbutton"] {
     margin-top: 0.5%;
-    border-radius: 5px;
+    border-radius: 10px;
     border: 1px;
     cursor: pointer;
-    width: 100px;
+    width: 80px;
     height: 35px;
     font-family: Gyeonggi_Title_Light;
     font-size: 17px;
 }
 
-button[name="submitBtn"] {
-    background-color: rgb(90, 171, 238);
-}
-
-button[name="submitBtn"]:hover { 
-    background-color: rgb(79, 151, 209);
+button[name="deletebutton"] {
+    margin-top: 0.5%;
+    border-radius: 10px;
+    border: 1px;
+    cursor: pointer;
+    width: 80px;
+    height: 35px;
+    font-family: Gyeonggi_Title_Light;
+    font-size: 17px;
 }

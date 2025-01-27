@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<!-- static 파일에 있는 모든 리소스를 불러옴 -->
+<!-- todo: 포스트 뷰 페이지에서 리스트로 보여주는 형태가 아닌 메인 페이지에서 포스트를 클릭 시 포스트룰 로드하도록 분리 -->
+<!-- div id = 이 페이지에서 한 번만 사용 가능, div class= 재사용 가능-->
+{% load static %} 
+<html>
+<head>
+    <title>포스트 자세히 보기</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/postdetail.css' %}">
+    <link rel="stylesheet" href="{% static 'css/postcomment.css' %}">
+</head>
+<body>
+    <header>
+        <div class="header_title">
+            블로그
+        </div>
+    </header>
+    <div id= "postdetail_mainwidget">
+        <div id= "postwidget">
+            <div id= "postlist">
+                <div>
+                    <h3>카테고리 표시 div 태그 추가해서 위젯으로 만들기</h3>
+                    <posttitle>
+                        <p>{{ posts.post_title }}</p>
+                    </posttitle>
+                    <div class="updatedeletebtn_widget">
+                        <p style="margin-right:auto">{{ posts.post_date }}</p>
+                        <div>
+                            <button name="editbutton" type="button" onclick="window.location.replace('{% url 'edit_post' posts.post_id %}')">✏️ 수정</button>
+                        </div>
+                        <div style="padding-left: 0.5%">
+                            <form method="post" action="{% url 'delete_post' posts.post_id %}" onsubmit="return confirmDelete()">
+                                {% csrf_token %}
+                                <button type="submit" name="deletebutton">❌ 삭제</button>
+                            </form>
+                        </div>                        
+                    </div>
+                    <hr>
+                </div>
+                <div>
+                    {{ posts.post_contents | safe}}
+                </div>
+            </div>
+        </div>
+        <div class="postcommentwidget">
+            <h2 style = "padding-left: 3%">댓글 div 태그 추가해서 위젯으로 만들기 + 댓글 작성 버튼 달기</h2>
+            {% for comment in comments%}
+            <div class="postcommentlist">
+                {% if comment.comment_isreply %}
+                <div class="postcommentlist_depth">
+                    ↘️ <span>{{ comment.comment_editor_uid }}</span>&nbsp;
+                    <span>{{ comment.comment_contents }}</span>
+                </div>
+            {% else %}
+                <div id="postcommentlist">
+                    <span>{{ comment.comment_editor_uid }}</span>
+                    <span>{{ comment.comment_contents }}</span>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+            <div class="postcommentinput">
+                <!--
+                <div class="postcommentinputwidget">
+                    <textarea class="postcommenttextarea"></textarea>
+                </div>
+                <button name="commentapplybutton">작성</button>
+                -->
+                <form class="postcommentinputwidget" method="post">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <textarea class= "postcommenttextarea" name="comment_contents" placeholder="댓글을 입력해주세요"></textarea>
+                    <button type="submit" name="commentapplybutton">작성</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script src="{% static 'js/postdetail.js' %}" type="text/javascript">
+    </script>
+    <footer>
+        <div>
+            푸터
+        </div>
+    </footer>
+</body>
+</html>
