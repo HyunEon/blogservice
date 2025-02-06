@@ -24,7 +24,7 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.showmain), # 아무 것도 입력 안 했을 경우 view에 정의한 showmain 함수를 불러옴
-    path('post/', views.showpost),
+    path('post/', views.showpost, name='post_list'),
     path('post/new/', views.create_post, name='create_post'),
     path('post/<str:post_id>/edit/', views.edit_post, name='edit_post'),
     path('post/<str:post_id>/delete/', views.delete_post, name='delete_post'),

@@ -26,7 +26,7 @@ class BlogCategory(models.Model):
     
 class PostContents(models.Model):
     post_index = models.IntegerField(primary_key=True, null=False, auto_created=True, help_text='블로그 포스트 인덱스')
-    post_category_for = models.CharField(max_length=100, default='dd', help_text='카테고리 id')
+    post_category_for = models.CharField(max_length=100, help_text='카테고리 id')
     post_id = models.CharField(max_length=100, help_text='블로그 포스트 id 아마 GUID로 설정될 듯')
     post_title = models.CharField(max_length=20, null = False, db_index= True, help_text='블로그 포스트 제목 필드')
     post_contents =  models.TextField(null = False, help_text='블로그 포스트 내용 필드')

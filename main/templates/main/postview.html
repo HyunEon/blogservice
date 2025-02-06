@@ -14,25 +14,26 @@
 <body>
     <header>
         <div class="header_title">
-            블로그
+            <a href="{% url 'post_list' %}">블로그</a>
         </div>
     </header>
     <div id= "postdetail_mainwidget">
         <div id= "postwidget">
             <div id= "postlist">
                 <div>
-                    <h3>카테고리 표시 div 태그 추가해서 위젯으로 만들기</h3>
+                    <h3>{{ category.category_name }}</h3>
                     <posttitle>
-                        <p>{{ posts.post_title }}</p>
+                        <p>{{ post.post_title }}</p>
                     </posttitle>
                     <div class="updatedeletebtn_widget">
-                        <p style="margin-right:auto">{{ posts.post_date }}</p>
+                        <p style="margin-right:auto">{{ post.post_date }}</p>
                         <div>
-                            <button name="editbutton" type="button" onclick="window.location.replace('{% url 'edit_post' posts.post_id %}')">✏️ 수정</button>
+                            <button name="editbutton" type="button" onclick="window.location.replace('{% url 'edit_post' post.post_id %}')">✏️ 수정</button>
                         </div>
                         <div style="padding-left: 0.5%">
-                            <form method="post" action="{% url 'delete_post' posts.post_id %}" onsubmit="return confirmDelete()">
+                            <form method="post" action="{% url 'delete_post' post.post_id %}" onsubmit="return confirmDelete()">
                                 {% csrf_token %}
+                                <!-- todo: 삭제 시 포스트에 포함된 댓글, 사진이 모두 삭제되도록 변경-->
                                 <button type="submit" name="deletebutton">❌ 삭제</button>
                             </form>
                         </div>                        
@@ -40,7 +41,7 @@
                     <hr>
                 </div>
                 <div>
-                    {{ posts.post_contents | safe}}
+                    {{ post.post_contents | safe}}
                 </div>
             </div>
         </div>
@@ -68,9 +69,8 @@
                 </div>
                 <button name="commentapplybutton">작성</button>
                 -->
-                <form class="postcommentinputwidget" method="post">
+                <form class="postcommentinputwidget" name="createcommentform" method="post">
                     {% csrf_token %}
-                    {{ form.as_p }}
                     <textarea class= "postcommenttextarea" name="comment_contents" placeholder="댓글을 입력해주세요"></textarea>
                     <button type="submit" name="commentapplybutton">작성</button>
                 </form>

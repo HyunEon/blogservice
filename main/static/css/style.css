@@ -82,7 +82,7 @@ input[name="post_searchbox"]:focus {
     box-shadow: none; /* 그림자 제거 (옵션) */
 }
 
-a { /* 임시로 a 옵션을 이렇게 해놨는데 나중에 id로 분리할 것 */
+a[name="link_postdetail"] {
     color: inherit;
     text-decoration: none;
 }

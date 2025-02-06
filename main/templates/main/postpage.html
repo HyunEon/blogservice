@@ -12,7 +12,7 @@
 <body>
     <header>
         <div class="header_title">
-            블로그
+            <a href="{% url 'post_list' %}">블로그</a>
         </div>
         <div class = "searchbox_bar">
             <button type="submit" name="searchbtn" onclick="">🔍</button>
@@ -41,7 +41,7 @@
                 {% for post in posts%}
                 <div>
                     <posttitle>
-                        <a href="{% url 'showpostdetail' post.post_id %}">{{ post.post_title }}</a>
+                        <a name="link_postdetail" href="{% url 'showpostdetail' post.post_id %}">{{ post.post_title }}</a>
                     </posttitle>
                     <p>{{ post.post_date }}</p>
                     <hr>

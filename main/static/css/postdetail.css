@@ -33,6 +33,11 @@
     font-style: normal;
 }
 
+a[name="link_postdetail"] {
+    color: inherit;
+    text-decoration: none;
+}
+
 #postdetail_mainwidget {
     display: flex;
     flex-direction: column;
