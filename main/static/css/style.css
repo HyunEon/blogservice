@@ -87,6 +87,11 @@ a[name="link_postdetail"] {
     text-decoration: none;
 }
 
+a[name="blog-title"] {
+    color: inherit;
+    text-decoration: none;
+}
+
 posttitle {
     font-family: 'Gyeonggi_Title_Medium';
     font-size: 30px;
@@ -124,6 +129,7 @@ button[name="postbutton"]:hover {
     display: flex;
     border-radius: 15px;
     background-color: white;
+    width: 200px;
 }
 
 .header_title {

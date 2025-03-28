@@ -38,6 +38,11 @@ a[name="link_postdetail"] {
     text-decoration: none;
 }
 
+a[name="blog-title"] {
+    color: inherit;
+    text-decoration: none;
+}
+
 #postdetail_mainwidget {
     display: flex;
     flex-direction: column;

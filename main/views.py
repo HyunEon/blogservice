@@ -1,16 +1,39 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
+from django.urls import reverse
+from django.conf import settings
+from django.http import Http404
+from django.db.models import Q
+
 from .models import BlogInfo, PostContents, PostComments, BlogCategory
 from .forms import PostForm, CommentForm
-import uuid
+import uuid, os, re
 
 # Create your views here.
 def showmain(request):
     return render(request, 'main/mainpage.html/')
 
 def showpost(request):
-    categorys = BlogCategory.objects.all() # 나중에 블로그 id로 필터링 걸어서 가져오기
-    posts = PostContents.objects.all().order_by('-post_date') # 작성된 날짜 순으로 정렬
+    user = 'u192038'
+    blog = get_object_or_404(BlogInfo, blog_user = user).blog_id
+    categorys = BlogCategory.objects.all().filter(category_for = blog)
+    query = request.GET.get("q", None)
+
+    if query:
+        posts = PostContents.objects.filter(post_title__icontains=query).order_by('-post_date')  # 대소문자 구분 없이 검색
+    else:
+        posts = PostContents.objects.all().order_by('-post_date')  # 전체 포스트 가져오기
+
+    return render(request, 'main/postpage.html/', {'posts': posts, 'categorys': categorys})
+
+def showpostbycategory(request, category_id):
+    user = 'u192038'
+    blog = get_object_or_404(BlogInfo, blog_user = user).blog_id
+    # 카테고리 란에 들어갈 카테고리를 리턴해 줌, 어떤 포스트를 보든 표시되어야 하기 때문에 반드시 필요함
+    categorys = BlogCategory.objects.all().filter(category_for = blog)
+    # 해당 카테고리의 하위 카테고리가 있다면 가져와서 ID만 잘라냄, Q객체를 사용해서 OR 조건을 표기할 수 있음
+    target_categories = BlogCategory.objects.all().filter(Q(category_id = category_id) | Q(category_depth_for = category_id)).values_list('category_id', flat=True)
+    posts = PostContents.objects.all().filter(post_category_for__in = target_categories).order_by('-post_date') # 작성된 날짜 순으로 정렬
 
     return render(request, 'main/postpage.html/', {'posts': posts, 'categorys': categorys})
 
@@ -70,33 +93,98 @@ def edit_post(request, post_id):
 
 def delete_post(request, post_id):
     targetpost = get_object_or_404(PostContents, post_id=post_id)
+
     if request.method == 'POST':
+
+        # 포스트에 삽입된 이미지 삭제 로직
+        media_root = settings.MEDIA_ROOT
+        image_urls = re.findall(r'\/uploads\/[^\s\'\"]+', targetpost.post_contents)
+        
+        print("Extracted Image URL:", image_urls)
+
+        for url in image_urls:
+            image_path = os.path.join(media_root, url.lstrip('/'))
+            print("Path:", image_path)
+            if os.path.exists(image_path):
+                os.remove(image_path)
+            else:
+                print(f"Image not found: {image_path}")
+        
+        # 포스트에 달린 댓글 삭제
+        PostComments.objects.all().filter(comment_postadress = post_id).delete()
+
+        # 포스트 삭제
         targetpost.delete()
+
         return redirect(showpost)
     
     return render(request, 'main/postview.html', {'posts': targetpost})
 
 def createcomment(request, post_id):
-    targetpostcomment = get_object_or_404(PostComments, comment_postadress=post_id)
-    print(targetpostcomment)
+    # 댓글이 없는 글이면 order는 0부터 시작, 있으면 마지막 댓글 order + 1
+    try:
+        targetpostcomment = PostComments.objects.all().filter(comment_postadress=post_id).latest('comment_date')
+        comment_order = targetpostcomment.comment_order + 1
+    except PostComments.DoesNotExist:
+        comment_order = 0
 
-    # todo: 댓글 뷰도 동일한 방식으로 처리하기, 폼을 사용 안 하는게 수월할지도 모르겠음
     if request.method == 'POST':
         form = CommentForm(request.POST)
         form.data = form.data.copy()
         form.data['comment_id'] = uuid.uuid4()
         form.data['comment_editor_uid'] = 'u192038'
         form.data['comment_postadress'] = post_id
-        form.data['comment_order'] = targetpostcomment.comment_order + 1
+        form.data['comment_order'] = comment_order
 
         if form.is_valid():
-            print(form)
-            #form.save()
-            return redirect(showpostdetail(post_id))  # 성공 페이지로 리다이렉트
+            form.save()
+            # reverse 함수를 써서 url에 파라미터를 넣어 리다이렉트 할 수 있었다..
+            return redirect(reverse('showpostdetail', args=[post_id])) # 성공 페이지로 리다이렉트
         else:
             print(form.errors)
     else:
         form = CommentForm()
         
-    return render(request, 'main/postview.html/', {'form': form})
+    return render(request, 'main/postview.html/', {'form': form, 'post_id': post_id})
 
+# 답글 작성하는 view
+def createreplycomment(request, post_id, comment_id):
+    # 해당 댓글의 마지막 댓글 order를 가져옴
+    try:
+        targetpostcomment = PostComments.objects.all().filter(comment_postadress = post_id, comment_id = comment_id).latest('comment_date')
+        comment_order = targetpostcomment.comment_order
+    except:
+        raise Http404("The comment does not exist.")
+
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+        form.data = form.data.copy()
+        form.data['comment_id'] = uuid.uuid4()
+        form.data['comment_editor_uid'] = 'u192038'
+        form.data['comment_postadress'] = post_id
+        form.data['comment_order'] = comment_order
+        form.data['comment_isreply'] = True
+        form.data['comment_replyto'] = comment_id
+
+        if form.is_valid():
+            form.save()
+            # reverse 함수를 써서 url에 파라미터를 넣어 리다이렉트 할 수 있었다..
+            return redirect(reverse('showpostdetail', args=[post_id])) # 성공 페이지로 리다이렉트
+        else:
+            print(form.errors)
+    else:
+        form = CommentForm()
+        
+    return render(request, 'main/postview.html/', {'form': form, 'post_id': post_id})
+
+def deletecomment(request, post_id, comment_id):
+    targetcomment = get_object_or_404(PostComments, comment_id = comment_id)
+
+    # 댓글 삭제의 경우, 내용 및 옵션 변경 처리/ 추후 관련 댓글까지 모두 삭제하도록 하는 것이 더 나을지 고민해봐야겠다
+    if request.method == 'POST':
+        targetcomment.comment_contents = "삭제된 댓글입니다."
+        targetcomment.comment_isdelete = True
+        targetcomment.save()
+        return redirect(reverse('showpostdetail', args=[post_id])) # 성공 페이지로 리다이렉트
+    
+    return redirect(reverse('showpostdetail', args=[post_id]))

@@ -35,6 +35,7 @@
 
 body {
     font-family: 'Gyeonggi_Title_Light';
+    background-color: #F6F7F9;
 }
 
 header {
@@ -45,7 +46,7 @@ header {
 }
 
 #editformarea {
-    width: 50%;
+    width: 30%;
 }
 
 #coneditform {
@@ -64,7 +65,7 @@ label {
 
 form {
     display: flex; 
-    flex-direction: column; 
+    flex-direction: column;
     gap: 3px; 
     width: 100%;
     text-align: center;
@@ -104,4 +105,35 @@ button[name="submitBtn"] {
 
 button[name="submitBtn"]:hover { 
     background-color: rgb(79, 151, 209);
+}
+
+.editformarea {
+    display: flex;
+    background-color: white;
+    border-radius: 3%;
+    padding: 0.5%;
+}
+
+.subject-category-area {
+    display: flex;
+}
+
+.post-title-input {
+    width: 100%;
+    margin-left: 1%;
+    padding-left: 10px;
+    border-color: #e8e9ec;
+    border-width: 1px;
+}
+
+.post-category-selector {
+    font-family: 'Gyeonggi_Title_Light';
+    font-size: 16px;
+    border-radius: 5px;
+    width: 170px;
+    border-color: #e8e9ec;
+}
+
+.post-title-input:focus, .post-category-selector:focus {
+    outline: none;
 }

@@ -47,6 +47,7 @@ class PostComments(models.Model):
     comment_contents = models.TextField(null = False, help_text='댓글 내용')
     comment_date = models.DateTimeField(auto_now_add=True, help_text='댓글 작성한 날짜')
     comment_isreply = models.BooleanField(help_text='답글 여부 확인')
+    comment_isdelete = models.BooleanField(help_text='삭제 여부 확인', default=False)
     comment_replyto = models.CharField(max_length=100, null=True, blank= True, help_text='답글 주소 id, 댓글 ID를 여기다 넣음, 근데 order 스키마로 충분한 것 같아 제거해야 하나 고민중')
 
     def __str__(self):

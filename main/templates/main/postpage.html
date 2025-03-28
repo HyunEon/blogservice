@@ -12,22 +12,25 @@
 <body>
     <header>
         <div class="header_title">
-            <a href="{% url 'post_list' %}">블로그</a>
+            <a class= "blog-title-header" name="blog-title" href="{% url 'post_list' %}">블로그</a>
         </div>
         <div class = "searchbox_bar">
-            <button type="submit" name="searchbtn" onclick="">🔍</button>
+            <button type="submit" name="searchbtn" onclick="searchpost()">🔍</button>
             <input id="searchbox" type="text" name="post_searchbox" placeholder="검색할 내용을 입력해주세요">
         </div>
     </header>
     <div id= "mainwidget"> <!--<ui>, <li>로 카테고리 개선해보자-->
         <div id= "postcategorywidget">
+            <div id="postcategorylist" onclick="window.location.replace('{% url 'post_list' %}')">
+                <b>전체글 보기</b>
+            </div>
             {% for category in categorys%}
             {% if category.category_isdepth %}
-                <div id="postcategorylist_depth">
+                <div id="postcategorylist_depth" onclick="window.location.replace('{% url 'postbycategory' category.category_id %}')">
                     ↘️ {{ category.category_name }}
                 </div>
             {% else %}
-                <div id="postcategorylist">
+                <div id="postcategorylist" onclick="window.location.replace('{% url 'postbycategory' category.category_id %}')">
                     {{ category.category_name }}
                 </div>
                 {% endif %}
@@ -46,14 +49,14 @@
                     <p>{{ post.post_date }}</p>
                     <hr>
                 </div>
-                <div>
+                <div style="cursor:pointer;"onclick="window.location.replace('{% url 'showpostdetail' post.post_id %}')">
                     {{ post.post_contents | safe}}
                 </div>
                 {% endfor %}
             </div>
         </div>
         <div id= "postbtnbar">
-            <button name= "postbutton" type="button" onclick="location.replace('new/');">✏️ 작성</button>
+            <button name= "postbutton" type="button" onclick="window.location.replace('{% url 'create_post' %}')">✏️ 작성</button>
         </div>
     </div>
     <script src="{% static 'js/post.js' %}" type="text/javascript">

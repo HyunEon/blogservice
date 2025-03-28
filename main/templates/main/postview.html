@@ -14,7 +14,7 @@
 <body>
     <header>
         <div class="header_title">
-            <a href="{% url 'post_list' %}">블로그</a>
+            <a class= "blog-title-header" name="blog-title" href="{% url 'post_list' %}">블로그</a>
         </div>
     </header>
     <div id= "postdetail_mainwidget">
@@ -33,7 +33,6 @@
                         <div style="padding-left: 0.5%">
                             <form method="post" action="{% url 'delete_post' post.post_id %}" onsubmit="return confirmDelete()">
                                 {% csrf_token %}
-                                <!-- todo: 삭제 시 포스트에 포함된 댓글, 사진이 모두 삭제되도록 변경-->
                                 <button type="submit" name="deletebutton">❌ 삭제</button>
                             </form>
                         </div>                        
@@ -46,33 +45,61 @@
             </div>
         </div>
         <div class="postcommentwidget">
-            <h2 style = "padding-left: 3%">댓글 div 태그 추가해서 위젯으로 만들기 + 댓글 작성 버튼 달기</h2>
+            <h2 style = "padding-left: 3%">댓글</h2>
             {% for comment in comments%}
             <div class="postcommentlist">
                 {% if comment.comment_isreply %}
                 <div class="postcommentlist_depth">
-                    ↘️ <span>{{ comment.comment_editor_uid }}</span>&nbsp;
+                    ↘️ <span>{{ comment.comment_editor_uid }}</span>
+                    &nbsp; : &nbsp;
                     <span>{{ comment.comment_contents }}</span>
-                </div>
-            {% else %}
-                <div id="postcommentlist">
+                    {% if not comment.comment_isdelete %}
+                        <span class = "comment_replytext" onclick="activateReplyWidget(event)">답글</span>
+                    {% endif %}
+                    </div>
+                    {% if not comment.comment_isdelete %}
+                    <div class="commentmenu_bar">
+                        <span class = "comment_editicon">✏️</span>
+                        <form action ="{% url 'deletecomment' post.post_id comment.comment_id %}" onsubmit="return confirmDelete()" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="comment_deleteicon" style="background: none; border: none; color: inherit; cursor: pointer;">🗑️</button>
+                        </form>
+                    </div>
+                    {% endif %}
+                {% else %}
+                <div class="postcomment_normal">
                     <span>{{ comment.comment_editor_uid }}</span>
+                    &nbsp;:&nbsp;
                     <span>{{ comment.comment_contents }}</span>
+                    {% if not comment.comment_isdelete %}
+                        <span class = "comment_replytext" onclick="activateReplyWidget(event)">답글</span>
+                    {% endif %}
                 </div>
+                    {% if not comment.comment_isdelete %}
+                <div class="commentmenu_bar">
+                    <span class = "comment_editicon">✏️</span>
+                    <form action ="{% url 'deletecomment' post.post_id comment.comment_id %}" onsubmit="return confirmDelete()" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="comment_deleteicon" style="background: none; border: none; color: inherit; cursor: pointer;">🗑️</button>
+                    </form>
+                </div>
+                    {% endif %}
                 {% endif %}
             </div>
             {% endfor %}
             <div class="postcommentinput">
-                <!--
-                <div class="postcommentinputwidget">
-                    <textarea class="postcommenttextarea"></textarea>
-                </div>
-                <button name="commentapplybutton">작성</button>
-                -->
-                <form class="postcommentinputwidget" name="createcommentform" method="post">
+                <!-- 아닛! 보통 버튼에 유효성 검사 로직을 넣었는데 폼에도 넣을 수 있었다 -->
+                <form action="{% url 'createcomment' post.post_id %}" name="createcommentform" class="postcommentinputwidget" method="post" onsubmit="return validationcomment('normal')">
                     {% csrf_token %}
                     <textarea class= "postcommenttextarea" name="comment_contents" placeholder="댓글을 입력해주세요"></textarea>
                     <button type="submit" name="commentapplybutton">작성</button>
+                </form>
+            </div>
+            <div class="postreplytinput" style="display: none;">
+                <form action="{% url 'createreplycomment' post.post_id 0 %}" name="createreplycommentform" class="postcommentinputwidget" method="post" onsubmit="return validationcomment('reply')">
+                    {% csrf_token %}
+                    <textarea class= "postcommentreplytextarea" name="comment_contents" placeholder="답글을 입력해주세요"></textarea>
+                    <button type="submit" name="commentreplyapplybutton">작성</button>
                 </form>
             </div>
         </div>

@@ -9,4 +9,3 @@ function validationCheck() {
         return false;
     }
 }
-

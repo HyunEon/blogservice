@@ -1,5 +1,5 @@
 from django import forms
-from .models import PostContents, PostComments
+from .models import PostContents, PostComments, MediaContent
 
 # 글 쓰기 폼
 class PostForm(forms.ModelForm):

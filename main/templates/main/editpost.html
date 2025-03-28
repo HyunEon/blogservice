@@ -49,22 +49,20 @@
 <body>
     <!-- 몰랐는데 form 태그를 사용하면 컨테이너 역할 말고도 내부 input 태그에 일괄로 작업을 처리할 수 있어 유연하다! -->
      <header>
-        <div>포스트를 작성하세요</div>
      </header>
      <div id = "coneditform">
-        <div id = "editformarea">
+        <div id = "editformarea" class = "editformarea">
             <form id="createpostform" name = "createpostform" method="POST">
                 {% csrf_token %}
-                <label for="post_title" readonly>카테고리</label>
-                <select name="post_category_for">
-                    {% for category in categories %}
-                        <option value="{{ category.category_id }}" {% if category.category_id == form.instance.post_category_for %}selected{% endif %} >{{ category.category_name }}</option>
-                    {% endfor %}
-                </select>
-                <br>
-                <label for="post_title" readonly>제목</label>
-                <br>
-                <input id="post_title" type="text" name="post_title" placeholder="제목을 입력해주세요" value="{{ form.post_title.value|default_if_none:'' }}">
+                    <div class="subject-category-area">
+                    <select name="post_category_for" class="post-category-selector">
+                        {% for category in categories %}
+                            <option value="{{ category.category_id }}" {% if category.category_id == form.instance.post_category_for %}selected{% endif %} >{{ category.category_name }}</option>
+                        {% endfor %}
+                    </select>
+                    <br>
+                    <input id="post_title" class="post-title-input" type="text" name="post_title" placeholder="제목을 입력해주세요" value="{{ form.post_title.value|default_if_none:'' }}">
+                </div>
                 <br>
                 <label for="post_contents">내용</label>
                 <br>
