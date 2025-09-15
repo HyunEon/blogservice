@@ -1,0 +1,65 @@
+/* base.css */
+
+/* 기본 스타일 */
+body {
+    font-family: 'Gyeonggi_Title_Light', sans-serif;
+    background-color: #F6F7F9;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+/* 레이아웃 컨테이너 */
+.container {
+    max-width: 960px; /* 적절한 최대 너비 설정 */
+    width: 90%;
+    margin: 0 auto; /* 중앙 정렬 */
+}
+
+/* 헤더 스타일 */
+.main-header {
+    background-color: #F6F7F9;
+    padding: 1.5rem 0;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+}
+
+.blog-title-link {
+    font-size: 2.5rem;
+    /*font-weight: bold;*/
+    color: inherit;
+    text-decoration: none;
+}
+
+/* 메인 콘텐츠 스타일 */
+.main-content {
+    margin-top: 8rem; /* 고정 헤더 높이만큼 마진 추가 */
+    padding: 2rem 0;
+}
+
+/* 푸터 스타일 */
+.main-footer {
+    padding: 1rem 0;
+    text-align: center;
+    border-top: 1px solid #ddd;
+    color: #666;
+}
+
+.header-container {
+    display: flex; /* Make it a flex container */
+    justify-content: space-between; /* Pushes the first item to the left and the last item to the right */
+    align-items: center; /* Vertically centers the items */
+    padding: 10px 20px; /* Add some padding for spacing */
+}
+
+.nav-menu {
+    list-style: none; /* Remove bullet points */
+    margin: 0;
+    padding: 0;
+}
+
+.nav-item {
+    display: inline-block; /* Aligns the list item horizontally */
+}

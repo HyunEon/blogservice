@@ -54,19 +54,6 @@ class PostComments(models.Model):
         """String for representing the MyModel object (in Admin site etc.)."""
         return self.comment_postadress
     
-
-# 미디어(사진, 동영상, 파일 포함)가 업로드되는 테이블.. 을 따로 만들었으나 CKeditor를 사용해보니 플러그인 단에서 경로만 지정해주면 자체적으로 지원되는 것 같다. 
-# 추후 동영상이나 이모티콘 같은 기능에서 사용하면 좋을 것 같다.
-class MediaContent(models.Model):
-    media_index = models.IntegerField(primary_key=True, auto_created=True, help_text='미디어 인덱스')
-    media_id = models.CharField(max_length=100, help_text='미디어 id')
-    media_name = models.CharField(max_length=100, help_text='미디어 파일 이름름')
-    media_date = models.DateTimeField(auto_now=True, help_text='미디어가 업로드된 날짜')
-    media_contents = models.TextField(help_text='미디어 데이터, base64로 인코딩해서 넣을듯, 사진이면 Webp를 적용하고 싶음')
-
-    def __str__(self):
-        return self.media_name
-
 # Access model field values using Python attributes.
 #print(record.id) # should return 1 for the first record.
 #print(record.my_field_name) # should print 'Instance #1'

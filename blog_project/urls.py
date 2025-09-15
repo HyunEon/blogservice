@@ -16,13 +16,17 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.contrib.auth import views as auth_views
 from main import views
 from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.showmain), # 아무 것도 입력 안 했을 경우 view에 정의한 showmain 함수를 불러옴
+    path('', views.showmain, name='showmain'), # 메인 페이지
+    path('login/', views.loginview, name='loginview'), # 로그인 페이지에 직접 들어온 경우도 로그인 여부에 따라 리다이렉트
+    # path('login/', auth_views.LoginView.as_view(template_name='main/login.html'), name='login'), 
+    path('logout/', views.logoutview, name='logout'), # 로그아웃
     path('post/', views.showpost, name='post_list'),
     path('post/view/<str:category_id>', views.showpostbycategory, name='postbycategory'),
     path('post/new/', views.create_post, name='create_post'),

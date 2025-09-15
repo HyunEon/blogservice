@@ -1,2 +1,13 @@
-<h1>Hello, World!</h1>
-<a href="/post/">포스트 뷰로 이동</a>
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block extra_head %}
+{% endblock %}
+
+{% block title %}메인 페이지{% endblock %}
+
+{% block content %}
+<div class="container-main-views">
+    <h2 class="text-center">메인 페이지</h2>
+</div>
+{% endblock %}
