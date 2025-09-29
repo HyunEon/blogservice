@@ -45,7 +45,22 @@ ALLOWED_HOSTS = ['*']
 LOGIN_URL = '/login/'
 
 # 로그인 성공후 이동하는 URL
-LOGIN_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = 'main/'
+
+# 세션 만료 시간 - 현재 5분
+SESSION_EXPIRE_SECONDS = 300
+
+# 브라우저 닫았을 때 세션 만료되도록 설정
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+# 마지막 활동 후 세션 만료
+SESSION_EXPIRE_AFTER_LAST_ACTIVITY = True
+
+# 마지막 활동 후 세션 추적 대기 시간
+SESSION_EXPIRE_AFTER_LAST_ACTIVITY_GRACE_PERIOD = 60 # group by minute
+
+# 세션 만료 후 리다이렉트
+SESSION_TIMEOUT_REDIRECT = '/login/'
 
 # Application definition
 INSTALLED_APPS = [
@@ -61,8 +76,9 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django_session_timeout.middleware.SessionTimeoutMiddleware',
+    'django.middleware.security.SecurityMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -83,6 +99,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'main.context_processors.user_blog_context',
             ],
         },
     },

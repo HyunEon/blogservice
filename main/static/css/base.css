@@ -63,3 +63,24 @@ body {
 .nav-item {
     display: inline-block; /* Aligns the list item horizontally */
 }
+
+.nav-link {
+    text-decoration: none;
+    color: #4287f5;
+}
+
+.nav-main {
+    display: inline-block;
+    padding: 6px 14px;
+    font-size: 14px;
+    font-weight: bold;
+    text-decoration: none;
+    color: #fff;
+    background-color: #0073e6;
+    border-radius: 6px;
+    transition: background-color 0.2s;
+}
+
+.nav-main:hover {
+    background-color: #005bb5;
+}

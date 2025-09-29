@@ -7,6 +7,7 @@ from django.urls import reverse
 from django.conf import settings
 from django.http import Http404
 from django.db.models import Q
+from django.core.paginator import Paginator
 from .models import BlogInfo, PostContents, PostComments, BlogCategory
 from .forms import PostForm, CommentForm
 import uuid, os, re
@@ -36,44 +37,114 @@ def logoutview(request):
 
 @login_required
 def showmain(request):
-    '''if request.user.is_authenticated:
-        return render(request, 'main/mainpage.html')'''
-    return render(request, 'main/mainpage.html')
+    # 우선 블로그 정보 가져와서 프론트에서 나눠서 보여주기
+    bloglist = BlogInfo.objects.all()
+    return render(request, 'main/mainpage.html', {'bloglist': bloglist})
 
-@login_required
-def showpost(request):
-    user_id = request.user.id
-    blog = get_object_or_404(BlogInfo, blog_user = user_id).blog_id
-    categorys = BlogCategory.objects.all().filter(category_for = blog)
-    query = request.GET.get("q", None)
-
+def showblog(request, blog_id):
+    blog_info = get_object_or_404(BlogInfo, blog_id=blog_id)
+    all_categories = BlogCategory.objects.filter(category_for=blog_info)
+    posts_query = PostContents.objects.filter(post_blog=blog_info)
+    
+    query = request.GET.get("q")
     if query:
-        posts = PostContents.objects.filter(post_title__icontains=query).order_by('-post_date')  # 대소문자 구분 없이 검색
-    else:
-        posts = PostContents.objects.all().order_by('-post_date')  # 전체 포스트 가져오기
+        posts_query = posts_query.filter(post_title__icontains=query)
 
-    return render(request, 'main/postpage.html/', {'posts': posts, 'categorys': categorys})
+    # 모든 필터링이 끝난 최종 쿼리셋을 정렬합니다.
+    final_posts = posts_query.order_by('-post_date')
+    
+    # --- 페이지네이션 로직 시작 ---
+    
+    # 1. URL의 query string에서 'per_page' 값을 가져옵니다. 없으면 기본값으로 3을 사용합니다.
+    posts_per_page = request.GET.get('per_page', 3)
+    
+    # 2. Paginator 객체를 생성합니다. (전체 포스트 리스트, 한 페이지당 보여줄 포스트 개수)
+    paginator = Paginator(final_posts, posts_per_page)
+    
+    # 3. URL의 query string에서 'page' 값을 가져옵니다. 없으면 1페이지를 봅니다.
+    page_number = request.GET.get('page', 1)
+    
+    # 4. 요청된 페이지에 해당하는 포스트 목록을 page_obj에 담습니다.
+    #    .get_page()는 존재하지 않는 페이지 번호 등 예외를 안전하게 처리해 줍니다.
+    page_obj = paginator.get_page(page_number)
+    
+    # --- 페이지네이션 로직 끝 ---
+    
+    context = {
+        'posts': page_obj, 
+        'categories': all_categories,
+        'blog_info': blog_info,
+    }
+    
+    return render(request, 'main/blogpage.html', context)
 
 @login_required
-def showpostbycategory(request, category_id):
-    user_id = request.user.id
-    blog = get_object_or_404(BlogInfo, blog_user = user_id).blog_id
+def showpostdetail(request, blog_id, post_id):
+    post = get_object_or_404(PostContents, post_id = post_id, post_blog = blog_id)
+    category = get_object_or_404(BlogCategory, category_id = post.post_category)
+    comments = PostComments.objects.filter(comment_post = post_id).order_by('comment_order', 'comment_date')
+    
+    return render(request, 'main/post/postdetail.html', {'post': post, 'category': category, 'comments': comments})
+
+'''@login_required
+def showblog(request, blog_id, category_id=None):
+    # 블로그 컨텐츠
+    blog_info = get_object_or_404(BlogInfo, blog_id=blog_id)
+    # 블로그 전체 카테고리
+    if category_id != None:
+        categorys = BlogCategory.objects.filter(category_for=blog_info).all(),
+        categorys = BlogCategory.objects.filter(category_for=blog_info).all()
+    if category_id:
+        # 해당 카테고리와 그 하위 카테고리까지 모두 선택합니다.
+        target_categories = BlogCategory.objects.filter(
+            Q(pk=category_id) | Q(category_depth_for=category_id)
+        )
+        # 쿼리셋에 카테고리 필터를 추가합니다.
+        posts = posts.filter(post_category_for__in=target_categories)
+        
+    # 사용자가 입력한 쿼리가 있으면 가져와서 필터링 함.
+    query = request.GET.get("q", None)
+    if query:
+        posts = PostContents.objects.filter(
+            post_blog=blog_info,  # 해당 블로그의 포스트만
+            post_title__icontains=query # 제목에 검색어가 포함된 것
+        ).order_by('-post_date')
+    else:
+        # 쿼리가 없으면 포스트를 모두 가져옴
+        posts = PostContents.objects.filter(post_blog=blog_info).order_by('-post_date')
+        # 포스트, 카테고리, 블로그 정보를 던져줌.
+    return render(request, 'main/blogpage.html', {'posts': posts, 'categorys': all_categorys, 'blog_info': blog_info})'''
+
+'''@login_required
+def showblog(request, blog_id):
+    # 블로그 컨텐츠
+    blog_info = get_object_or_404(BlogInfo, blog_id=blog_id)
+    # 블로그 카테고리
+    categorys = BlogCategory.objects.filter(category_for=blog_info).all()
+    # 사용자가 입력한 쿼리가 있으면 가져와서 필터링 함.
+    query = request.GET.get("q", None)
+    if query:
+        posts = PostContents.objects.filter(
+            post_blog=blog_info,  # 해당 블로그의 포스트만
+            post_title__icontains=query # 제목에 검색어가 포함된 것
+        ).order_by('-post_date')
+    else:
+        # 쿼리가 없으면 포스트를 모두 가져옴
+        posts = PostContents.objects.filter(post_blog=blog_info).order_by('-post_date')
+
+    # 5. 템플릿에 'blog_info' 객체를 함께 전달하면 템플릿에서 블로그 제목 등을 표시할 수 있습니다.
+    return render(request, 'main/postpage.html', {'posts': posts, 'categorys': categorys, 'blog_info': blog_info})'''
+
+@login_required
+def showpostbycategory(request, blog_id, category_id):
+    blog_info = get_object_or_404(BlogInfo, blog_id=blog_id)
     # 카테고리 란에 들어갈 카테고리를 리턴해 줌, 어떤 포스트를 보든 표시되어야 하기 때문에 반드시 필요함
-    categorys = BlogCategory.objects.all().filter(category_for = blog)
+    categorys = BlogCategory.objects.all().filter(category_for = blog_id)
     # 해당 카테고리의 하위 카테고리가 있다면 가져와서 ID만 잘라냄, Q객체를 사용해서 OR 조건을 표기할 수 있음
     target_categories = BlogCategory.objects.all().filter(Q(category_id = category_id) | Q(category_depth_for = category_id)).values_list('category_id', flat=True)
     posts = PostContents.objects.all().filter(post_category_for__in = target_categories).order_by('-post_date') # 작성된 날짜 순으로 정렬
 
     return render(request, 'main/postpage.html/', {'posts': posts, 'categorys': categorys})
-
-@login_required
-def showpostdetail(request, post_id):
-    #posts = PostContents.objects.get(PostContents, post_id = target_post_id)
-    post = get_object_or_404(PostContents, post_id = post_id)
-    category = get_object_or_404(BlogCategory, category_id = post.post_category_for)
-    comments = PostComments.objects.filter(comment_postadress = post_id).order_by('comment_order', 'comment_date')
-    
-    return render(request, 'main/postview.html', {'post': post, 'category': category, 'comments': comments})
 
 @login_required
 def create_post(request):
@@ -91,7 +162,7 @@ def create_post(request):
         if form.is_valid():
             post = form.save(commit=False) # 폼 임시 저장
             post.save()
-            return redirect(showpost)
+            return redirect(showblog)
         else:
             print(form.errors)
             form = PostForm() # 유효성 검사 실패 시 빈칸으로

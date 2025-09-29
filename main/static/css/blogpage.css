@@ -1,0 +1,223 @@
+/* static/css/post_list.css */
+
+/* 블로그 메인 레이아웃 (2단 그리드) */
+.blog-container {
+    display: grid;
+    grid-template-columns: 240px 1fr; /* 사이드바 240px, 나머지 공간은 메인 콘텐츠 */
+    gap: 2rem; /* 컬럼 사이의 간격 */
+    align-items: start; /* 콘텐츠가 짧아도 위쪽 정렬 유지 */
+}
+
+/* ===== 사이드바 스타일 ===== */
+.blog-sidebar {
+    background-color: #fff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    position: sticky; /* 스크롤 시 사이드바 상단에 고정 */
+    top: 8rem; /* base.css의 헤더 높이만큼 띄우기 */
+}
+
+.blog-sidebar h2 {
+    font-size: 1.25rem;
+    margin-top: 0;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid #eee;
+    margin-bottom: 1rem;
+}
+
+.category-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.category-item {
+    display: block;
+    padding: 0.75rem 1rem;
+    color: #333;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    font-size: 0.95rem;
+}
+
+.category-item:hover {
+    background-color: #e9ecef;
+    color: #000;
+}
+
+/* 들여쓰기된 카테고리 */
+.category-item-depth {
+    padding-left: 2rem;
+    position: relative;
+}
+
+.category-item-depth::before {
+    content: '↳';
+    position: absolute;
+    left: 1rem;
+    color: #888;
+}
+
+/* ===== 포스트 목록 스타일 ===== */
+.post-list-section {
+    min-width: 0; /* 그리드 아이템이 넘치는 것을 방지 */
+}
+
+/* 검색창 */
+.search-container {
+    margin-bottom: 2rem;
+}
+
+.search-form {
+    display: flex;
+    border: 1px solid #ddd;
+    border-radius: 25px;
+    overflow: hidden;
+    background-color: #fff;
+}
+
+.search-form input {
+    flex-grow: 1;
+    border: none;
+    padding: 0.75rem 1.25rem;
+    font-size: 1rem;
+    outline: none;
+}
+
+.search-form button {
+    border: none;
+    background-color: transparent;
+    padding: 0 1.25rem;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: #555;
+}
+
+/* 개별 포스트 요약 */
+.post-summary {
+    background-color: #fff;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.post-summary:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.post-header h2 {
+    margin: 0 0 0.5rem 0;
+}
+
+.post-header h2 a {
+    color: inherit;
+    text-decoration: none;
+    font-size: 1.75rem;
+}
+
+.post-meta {
+    color: #888;
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+}
+
+.post-excerpt p {
+    color: #555;
+    line-height: 1.7;
+    margin: 0;
+}
+
+.read-more-link {
+    display: inline-block;
+    margin-top: 1rem;
+    color: #007bff;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.no-posts {
+    background-color: #fff;
+    padding: 3rem;
+    text-align: center;
+    border-radius: 8px;
+    color: #777;
+}
+
+/* 새 글 작성 버튼 */
+.write-post-button-container {
+    text-align: right;
+    margin-top: 1rem;
+}
+
+.write-post-btn {
+    display: inline-block;
+    background-color: #333;
+    color: #fff;
+    padding: 0.75rem 1.5rem;
+    border-radius: 25px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background-color 0.2s ease;
+}
+
+.write-post-btn:hover {
+    background-color: #555;
+}
+
+/* 페이지네이션 컨테이너 */
+.pagination {
+    /* Flexbox를 사용하여 내부 아이템들을 가운데 정렬합니다. */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 40px; /* 위쪽 콘텐츠와의 간격 */
+    margin-bottom: 20px;
+}
+
+/* 페이지 번호 링크와 현재 페이지 스타일 */
+.pagination a,
+.pagination .current-page {
+    color: #333; /* 기본 글자색 */
+    display: inline-flex; /* 내부 컨텐츠(숫자)를 가운데 정렬하기 위함 */
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    font-weight: 500;
+    text-decoration: none;
+
+    min-width: 40px; /* 최소 너비 */
+    height: 40px;    /* 높이 */
+    margin: 0 5px;   /* 좌우 간격 */
+    border-radius: 8px; /* 부드러운 모서리 */
+    border: 1px solid #ddd;
+    background-color: #fff;
+    
+    transition: background-color 0.2s ease, color 0.2s ease; /* 부드러운 전환 효과 */
+}
+
+/* 페이지 번호 링크에 마우스를 올렸을 때 */
+.pagination a:hover {
+    background-color: #f0f0f0;
+    color: #007bff;
+}
+
+/* 현재 활성화된 페이지 */
+.pagination .current-page {
+    background-color: #007bff; /* 포인트 색상 */
+    color: white; /* 흰색 글자 */
+    border-color: #007bff;
+    font-weight: bold;
+    cursor: default; /* 현재 페이지는 클릭할 필요 없음을 표시 */
+}
+
+/* '이전'/'다음' 링크 비활성화 시 (옵션) */
+.pagination .disabled {
+    color: #aaa;
+    pointer-events: none; /* 클릭 비활성화 */
+    background-color: #f9f9f9;
+}

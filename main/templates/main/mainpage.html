@@ -1,13 +1,33 @@
+<!-- TODO: 블로그 전체를 보여줄 수 있도록 UI 추가 -->
 {% extends 'main/base.html' %}
 {% load static %}
 
 {% block extra_head %}
+    <link rel="stylesheet" href="{% static 'css/mainpage.css' %}">
 {% endblock %}
 
 {% block title %}메인 페이지{% endblock %}
 
 {% block content %}
 <div class="container-main-views">
-    <h2 class="text-center">메인 페이지</h2>
+    <div class="mainpage-header">
+        <h2 class="explore-other-blog-h2">다른 사람들의 일상이 궁금하지 않나요?</h2>
+    </div>
+
+    <ul class="blog-list-container">
+        <!-- 추천 블로그 개념, 우선 3개까지만 보여줌. -->
+        {% for blog in bloglist|slice:":3" %}
+        <li class="blog-card">
+            <a class="blog-title" href="{% url 'showblog' blog_id=blog.blog_user.id %}">
+                {{ blog.blog_title }}
+            </a>
+            <div class="blog-meta">
+                ✍️ 블로거: {{ blog.blog_user.username }} <br>
+            </div>
+        </li>
+        {% empty %}
+        <p>아직 등록된 블로그가 없습니다!</p>
+        {% endfor %}
+    </ul>
 </div>
 {% endblock %}

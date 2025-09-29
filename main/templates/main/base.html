@@ -13,15 +13,22 @@
 <body>
     <header class="main-header">
         <div class="header-container">
-            <a href="{% url 'post_list' %}" class="blog-title-link">블로그</a>
+            <!-- 로그인 했으면 메인 페이지로 리다이렉트, 아니면 메인 페이지로-->
+            {% if user_blog %}
+            <a href="{% url 'showblog' blog_id=user_blog.blog_id %}"class="blog-title-link">블로그</a>
+            {% else %}
+            <a href="{% url 'showmain' %}"class="blog-title-link">블로그</a>
+            {% endif %}
             <ul class="nav-menu">
             {% block userinfo %}
             <li class="nav-item">
+                <!-- 로그인 했으면 로그아웃으로 리다이렉트, 아니면 로그인으로-->
                 {% if user.is_authenticated %}
                 <a class="nav-link" href="{% url 'logout' %}">{{ user.username }} (로그아웃)</a>
                 {% else %}
                 <a class="nav-link" href="{% url 'login' %}">로그인</a>
                 {% endif %}
+                <a class="nav-main" href="{% url 'showmain' %}">🏠 메인</a>
             </li>
             {% endblock %}
         </ul>
