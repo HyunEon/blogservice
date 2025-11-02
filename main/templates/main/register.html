@@ -1,0 +1,64 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'css/register.css' %}">
+{% endblock %}
+
+{% block title %}회원가입{% endblock %}
+
+<!-- 로그인 페이지에서는 사용자 정보가 나오지 않음-->
+{% block userinfo %}
+{% endblock %}
+
+{% block content %}
+<div class="container-login-form">
+    <h2 class="text-center">회원가입</h2>
+    <form method="post" action={% url 'showregister' %}>
+        {% csrf_token %}
+        {% include "main/form_errors.html" %}
+        <div class="mb-3">
+            <label for="username">ID</label>
+            <input type="text" class="form-control" name="username" id="username"
+                   value="{{ form.username.value|default_if_none:'' }}">
+                    <span class="input-help">블로그에 사용할 ID를 입력합니다.</span>
+        </div>
+        <div class="mb-3">
+            <label for="nickname">이름</label>
+            <input type="text" class="form-control" name="nickname" id="nickname"
+                   value="{{ form.nickname.value|default_if_none:'' }}">
+                    <span class="input-help">블로그에 사용할 블로거 이름을 입력합니다.</span>
+        </div>
+        <div class="mb-3">
+            <label for="useremail">이메일</label>
+            <div class="mb-3-email-input-group">
+                    <input type="text" class="form-control" name="email_id" id="email_id"
+                    placeholder="example" value="{{ request.POST.email_id|default_if_none:'' }}">
+                   <span class="at-symbol">@</span>
+                    <input type="text" class="form-control" name="email_domain" id="email_domain"
+                    placeholder="example.com" list="domain-list" value="{{ request.POST.email_domain|default_if_none:'' }}">
+                    <!-- 선택할 수 있는 도메인 리스트 -->
+                    <datalist id="domain-list">
+                        <option value="gmail.com">
+                        <option value="naver.com">
+                        <option value="daum.net">
+                        <option value="outlook.com">
+                    </datalist>
+            </div>
+            <span class="input-help">사용자 소유의 이메일을 입력합니다.</span>
+        </div>
+        <div class="mb-3">
+            <label for="password">비밀번호</label>
+            <input type="password" class="form-control" name="password1" id="password"
+                   value="{{ form.password.value|default_if_none:'' }}">
+                   <span class="input-help">비밀번호는 8자리 이상이며 영문, 숫자를 포함해야 합니다.</span>
+        </div>
+        <div class="mb-3">
+            <label for="password">비밀번호 확인</label>
+            <input type="password" class="form-control" name="password2" id="password_confirm"
+                   value="{{ form.password.value|default_if_none:'' }}">
+        </div>
+        <button type="submit" class="btn btn-primary">회원가입</button>
+    </form>
+</div>
+{% endblock %}

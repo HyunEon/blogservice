@@ -1,0 +1,134 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block title %}{{ blog.blog_title }}{% endblock %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'css/blog/blogpage.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container blog-container">
+    <aside class="blog-sidebar">
+        <h2>카테고리</h2>
+        <nav class="category-nav">
+            <ul>
+                <li>
+                    <a href="{% url 'showblog' blog_slug=blog.slug %}" class="category-item">전체글 보기</a>
+                </li>
+                {% for categories in categories %}
+                <li>
+                    <a href="{% url 'showblogbycategory' blog_slug=blog.slug category_slug=categories.slug %}" 
+                       class="category-item {% if categories.category_isdepth %}category-item-depth{% endif %}">
+                        {{ categories.category_name }}
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        </nav>
+    </aside>
+
+    <section class="post-list-section">
+        <div class="search-container">
+            {% if category_slug %}
+            <form action="{% url 'showblogbycategory' blog_slug=blog.slug category_slug=category_slug %}" method="get" class="search-form">
+                <input type="text" name="q" placeholder="검색어를 입력하세요..." value="{{ request.GET.q }}">
+                <button type="submit">🔍</button>
+            </form>
+            {% else %}
+            <form action="{% url 'showblog' blog_slug=blog.slug %}" method="get" class="search-form">
+                <input type="text" name="q" placeholder="검색어를 입력하세요..." value="{{ request.GET.q }}">
+                <button type="submit">🔍</button>
+            </form>
+            {% endif %}
+            <form method="get" class="per-page-form">
+                <!-- 검색 쿼리를 사용하면서 표시한 글 수를 조정하는 경우도 있으므로, hidden으로 검색 쿼리가 있으면 넘겨줌 -->
+                {% if request.GET.q %}
+                <input type="hidden" name="q" value="{{ request.GET.q }}">
+                {% endif %}
+                <label for="per_page">표시할 글 수:</label>
+                <select name="per_page" id="per_page" onchange="this.form.submit()">
+                    <option value="3" {% if request.GET.per_page == '3' %}selected{% endif %}>3개</option>
+                    <option value="5" {% if request.GET.per_page == '5' %}selected{% endif %}>5개</option>
+                    <option value="10" {% if request.GET.per_page == '10' %}selected{% endif %}>10개</option>
+                    <option value="20" {% if request.GET.per_page == '20' %}selected{% endif %}>20개</option>
+                </select>
+            </form>
+        </div>
+
+        <div class="post-list">
+            {% if posts %}
+                {% for post in posts %}
+                <article class="post-summary">
+                    <header class="post-header">
+                        <h2>
+                            <a href="{% url 'showpostdetail' post_slug=post.slug blog_slug=blog.slug %}">{{ post.post_title }}</a>
+                        </h2>
+                        <div class="post-meta">
+                            <span>{{ post.post_date|date:"Y년 m월 d일 H:i"}}</span>
+                        </div>
+                    </header>
+                    <div class="post-excerpt">
+                        <p>{{ post.post_contents|safe|striptags|truncatewords:5 }}</p>
+                    </div>
+                    <a href="{% url 'showpostdetail' post_slug=post.slug blog_slug=blog.slug %}" class="read-more-link">더 보기 &rarr;</a>
+                </article>
+                {% endfor %}
+            {% else %}
+                {% if request.GET.q %}
+                <div class="no-posts">
+                    <h3>텅..</h3>
+                    <p>검색된 키워드로 작성된 글이 하나도 없어요 😢</p>
+                </div>
+                {% else %}
+                    {% if user == blog.blog_user %}
+                    <div class="no-posts">
+                        <h3>첫 시작은 중요한 법이죠!</h3>
+                        <p>첫 번째 글을 작성해보세요!</p>
+                    </div>
+                    {% else %}
+                    <div class="no-posts">
+                        <h3>작성된 글이 없네요..</h3>
+                        <p>{{ blog.blog_user.nickname }}님은 아직 준비 중인가 봐요 😢</p>
+                        <a href="{% url 'showmain' %}">그동안 다른 블로그를 살펴볼까요?</p>
+                    </div>
+                    {% endif %} 
+                {% endif %}
+            {% endif %} 
+        </div>
+
+        <div class="pagination">
+            <!-- 이전 버튼 -->
+            {% if posts.has_previous %}
+            <!-- 검색 쿼리 & N개 씩 포스트 보기 포함 -->
+                <a href="?page={{ posts.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.per_page %}&per_page={{ request.GET.per_page }}{% endif %}" class="page-btn">&lt;</a>
+            {% else %}
+                <span class="page-btn disabled">&lt;</span>
+            {% endif %}
+
+            <!-- 페이지 번호 버튼들 -->
+            {% for num in posts.paginator.page_range %}
+                {% if num == posts.number %}
+                    <span class="page-btn active">{{ num }}</span>
+                {% else %}
+                    <a href="?page={{ num }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.per_page %}&per_page={{ request.GET.per_page }}{% endif %}" class="page-btn">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+
+            <!-- 다음 버튼 -->
+            {% if posts.has_next %}
+                <a href="?page={{ posts.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.per_page %}&per_page={{ request.GET.per_page }}{% endif %}" class="page-btn">&gt;</a>
+            {% else %}
+                <span class="page-btn disabled">&gt;</span>
+            {% endif %}
+        </div>
+        
+        <!-- 블로그 주인에게만 포스트 작성 버튼 보이게 -->
+        {% if user == blog.blog_user %}
+            <div class="write-post-button-container">
+                <a href="{% url 'createpost' %}" class="write-post-btn">✏️ 새 글 작성</a>
+            </div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

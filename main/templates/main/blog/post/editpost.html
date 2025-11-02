@@ -1,0 +1,49 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block title %}포스트 작성{% endblock %}
+
+{% block extra_head %}
+{{ form.media }}
+  <link rel="stylesheet" href="{% static 'css/blog/post/editpost.css' %}">
+  <script src="{% static 'js/post/editpost.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="editpost-container">
+  <div class="editform-card">
+    <form id="createpostform" method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+      {% include "main/form_errors.html" %}
+      <div class="subject-category-area">
+        {{ form.post_category }}
+        {{ form.post_title }}
+        <div class="title-align-buttons">
+        {% for value, label in form.title_align.field.choices %}
+          <label class="align-icon-label">
+            <input type="radio" name="{{ form.title_align.name }}" value="{{ value }}"
+              {% if form.title_align.value == value %}checked{% endif %}>
+            {% if value == 'left' %}
+              <span class="material-icons">format_align_left</span>
+            {% elif value == 'center' %}
+              <span class="material-icons">format_align_center</span>
+            {% elif value == 'right' %}
+              <span class="material-icons">format_align_right</span>
+            {% endif %}
+          </label>
+        {% endfor %}
+      </div>
+      </div>
+      <label for="editor" class="editor-label">내용</label>
+      {{ form.post_contents }}
+      
+      <div class="editpost-btns">
+        <button type="submit" class="btn-primary">게시하기</button>
+        <button type="button" class="btn-secondary" onclick="location.href=document.referrer;">
+          취소
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

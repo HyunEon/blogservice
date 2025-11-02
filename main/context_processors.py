@@ -1,4 +1,11 @@
-from .models import BlogInfo # BlogInfo 모델을 가져옵니다.
+from .models import BlogInfo, CustomUser # BlogInfo 모델을 가져옵니다.
+from django.conf import settings
+
+# settings에 정의한 구글 클라이언트 키를 가져옴.
+def google_client_id(request):
+    return {
+        'GOOGLE_CLIENT_ID': getattr(settings, 'GOOGLE_CLIENT_ID', None)
+    }
 
 def user_blog_context(request):
     # 로그인한 사용자일 경우에만 실행

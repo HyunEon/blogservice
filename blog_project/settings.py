@@ -41,14 +41,18 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://blog.hyuneon.org",
+]
+
 # 로그인 페이지 기본 URL
 LOGIN_URL = '/login/'
 
 # 로그인 성공후 이동하는 URL
-LOGIN_REDIRECT_URL = 'main/'
+# LOGIN_REDIRECT_URL = ''
 
-# 세션 만료 시간 - 현재 5분
-SESSION_EXPIRE_SECONDS = 300
+# 세션 만료 시간 - 현재 10분
+SESSION_EXPIRE_SECONDS = 600
 
 # 브라우저 닫았을 때 세션 만료되도록 설정
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
@@ -70,9 +74,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'ckeditor', 
-    'ckeditor_uploader',
-    'main',
+    'django.contrib.sites',
+    'django_ckeditor_5',
+    'main', 
 ]
 
 MIDDLEWARE = [
@@ -100,6 +104,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'main.context_processors.user_blog_context',
+                'main.context_processors.google_client_id',
             ],
         },
     },
@@ -107,17 +112,73 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'blog_project.wsgi.application'
 
+MINIO_CONFIG = get_secret("MINIO_CONFIG")
+try:
+    BUCKET_NAME = MINIO_CONFIG["NAME"]
+    MINIO_USER = MINIO_CONFIG["USER"]
+    MINIO_PW = MINIO_CONFIG["PASSWORD"]
+    MINIO_URL = MINIO_CONFIG["URL"]
+except KeyError as e:
+    raise ImproperlyConfigured(f"Missing MINIO_CONFIG key in secrets.json: {e}")
+
+AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID', MINIO_USER)
+AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY', MINIO_PW)
+AWS_STORAGE_BUCKET_NAME = BUCKET_NAME
+# 나중에 django가 사용할 읽기/쓰기만 가진 계정을 추가해서 적용하는게 보안적으로 더 좋을 것 같다.. (postgresql도 마찬가지)
+AWS_S3_ENDPOINT_URL = 'http://127.0.0.1:9002' # 파일 업로드/관리용
+
+# 2. 웹 브라우저가 접근할 외부 URL을 강제로 설정 (가장 중요!)
+AWS_S3_CUSTOM_DOMAIN = MINIO_URL
+# 4. 기타 S3 설정
+AWS_S3_OBJECT_PARAMETERS = {
+    'CacheControl': 'max-age=86400', # 캐시 설정 (선택 사항)
+}
+AWS_S3_USE_SSL = True  # [중요] 로컬 MinIO는 http이므로 False로 설정
+AWS_S3_SIGNATURE_VERSION = 's3v4' # S3 서명 버전
+AWS_QUERYSTRING_AUTH = False  # Signed URL 사용 안함 (개발용)
+
+STORAGES = {
+    # 'default'는 FileField, ImageField 등 미디어 파일 관리를 의미합니다.
+    "default": {
+        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+        # "OPTIONS": {} # BACKEND에서 바로 읽지 않고, 위 1~4번 설정을 읽어갑니다.
+    },
+    # 'staticfiles'는 기본값(로컬)을 유지합니다.
+    # (개발 환경에서는 static 파일을 MinIO에 올릴 필요가 거의 없습니다.)
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+# 데이터베이스 설정은 django secret 키와 같이 별도의 설정 파일로 관리
+DB_CONFIG = get_secret("DB_CONFIG")
+try:
+    DB_NAME = DB_CONFIG["NAME"]
+    DB_USER = DB_CONFIG["USER"]
+    DB_PW = DB_CONFIG["PASSWORD"]
+except KeyError as e:
+    raise ImproperlyConfigured(f"Missing DB_CONFIG key in secrets.json: {e}")
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': DB_NAME,
+        'USER': DB_USER,
+        'PASSWORD': DB_PW,
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.sqlite3',
+    #     'NAME': BASE_DIR / 'db.sqlite3',
+    # }
 }
 
+# 기본 User로 지정할 모델, Models.py의 CustomUser로 지정함.
+AUTH_USER_MODEL = 'main.CustomUser'
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -137,6 +198,15 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+SITE_ID = 1
+
+AUTHENTICATION_BACKENDS = [
+    'main.backends.GoogleBackend',
+    'django.contrib.auth.backends.ModelBackend',  # 기본 인증
+]
+
+# Google 클라이언트 키
+GOOGLE_CLIENT_ID = get_secret("GOOGLE_CLIENT_ID")
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
@@ -149,13 +219,12 @@ USE_I18N = True
 
 USE_TZ = False
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 
-STATICFILES_DIRS = [ 
+STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
 ]
 
@@ -164,6 +233,145 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CKEDITOR_UPLOAD_PATH = "uploads/" 
-MEDIA_URL = '/media/' 
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
+# ckeditor5 레퍼런스: https://pypi.org/project/django-ckeditor-5/
+# 업로드 경로
+CKEDITOR_5_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+CKEDITOR_5_UPLOAD_PATH = "uploads/"
+CKEDITOR_5_CUSTOM_CSS = '/static/css/blog/post/ckeditor5.css'
+
+# ckeditor 미디어 경로 설정
+CKEDITOR_5_UPLOAD_PATH = {
+    # 이미지
+    "image": "images/", 
+    
+    # 일반 파일
+    "file": "files/",
+    
+    # 만약 대비하여 기본 경로 설정
+    "default": "ckeditor-others/"
+}
+
+CKEDITOR_5_MAX_FILE_SIZE = 5
+
+customColorPalette = [
+        {
+            'color': 'hsl(4, 90%, 58%)',
+            'label': 'Red'
+        },
+        {
+            'color': 'hsl(340, 82%, 52%)',
+            'label': 'Pink'
+        },
+        {
+            'color': 'hsl(291, 64%, 42%)',
+            'label': 'Purple'
+        },
+        {
+            'color': 'hsl(262, 52%, 47%)',
+            'label': 'Deep Purple'
+        },
+        {
+            'color': 'hsl(231, 48%, 48%)',
+            'label': 'Indigo'
+        },
+        {
+            'color': 'hsl(207, 90%, 54%)',
+            'label': 'Blue'
+        },
+    ]
+
+# ckeditor config 설정
+CKEDITOR_5_CONFIGS = {
+    'default': {
+        'toolbar': {
+            'items': ['heading', '|', 'bold', 'italic', 'link',
+                      'bulletedList', 'numberedList', 'blockQuote', 'imageUpload'],
+                    },
+        'height': 800, # ckeditor5 기본 높이
+        'language': 'ko',
+        'typing': {
+            'transformWhitespace': False,  # Enter 시 공백/줄 간격 통일
+        },
+        'mediaEmbed': {
+            # ⭐ 이 설정을 True로 변경해야 실제 iframe 코드가 HTML에 포함됩니다.
+            'previewsInData': True, 
+        },
+    },
+    'extends': {
+        'blockToolbar': [
+            'paragraph', 'heading1', 'heading2', 'heading3',
+            '|',
+            'bulletedList', 'numberedList',
+            '|',
+            'blockQuote',
+        ],
+        'mediaEmbed': {
+            'previewsInData': True,
+        },
+        'toolbar': {
+            'items': ['heading', '|', 'alignment', 'outdent', 'indent', '|', 'bold', 'italic', 'link', 'underline', 'strikethrough',
+                    'fontSize', 'fontFamily', 'fontColor', 'fontBackgroundColor',
+                      'subscript', 'superscript', 'highlight', '|', 'codeBlock', 'sourceEditing', 'code', 'insertImage',
+                      'fileUpload', 'bulletedList', 'numberedList', 'todoList', '|',  'blockQuote',  '|',
+                     'mediaEmbed', 'removeFormat','insertTable', 'JustifyLeft', ],
+            'shouldNotGroupWhenFull': 'true'
+        },
+        'placeholder': '글을 작성해보세요!',
+        'alignment': {
+            'options': ['left', 'center', 'right', 'justify']  # 왼쪽, 가운데, 오른쪽, 양쪽
+        },
+        'image': {
+            'toolbar': ['imageTextAlternative', '|', 'imageStyle:alignLeft', 'imageStyle:alignCenter', 'imageStyle:alignRight', 'imageStyle:side',  '|'],
+            'styles': [
+                'full',
+                'side',
+                'alignLeft',
+                'alignRight',
+                'alignCenter',
+            ]
+        },
+        'table': {
+            'contentToolbar': [ 'tableColumn', 'tableRow', 'mergeTableCells',
+            'tableProperties', 'tableCellProperties' ],
+            'tableProperties': {
+                'borderColors': customColorPalette,
+                'backgroundColors': customColorPalette
+            },
+            'tableCellProperties': {
+                'borderColors': customColorPalette,
+                'backgroundColors': customColorPalette
+            }
+        },
+        'heading' : {
+            'options': [
+                { 'model': 'paragraph', 'title': 'Paragraph', 'class': 'ck-heading_paragraph' },
+                { 'model': 'heading1', 'view': 'h1', 'title': 'Heading 1', 'class': 'ck-heading_heading1' },
+                { 'model': 'heading2', 'view': 'h2', 'title': 'Heading 2', 'class': 'ck-heading_heading2' },
+                { 'model': 'heading3', 'view': 'h3', 'title': 'Heading 3', 'class': 'ck-heading_heading3' }
+            ]
+        },
+        'fontFamily': {
+            'options': [
+                'default', 'Arial', 'Courier New', 'Georgia', 'Lucida Sans Unicode', 'Tahoma','Trebuchet Ms'
+            ] + [
+                'Times New Roman, Times, serif',
+                'Verdana, Geneva, sans-serif',
+                'Pretendard', 'Gyeonggi_Title_Light', 'Gyeonggi_Title_Medium', 'Gyeonggi_Title_Bold', 'Gyeonggi_TitleV', 'Gyeonggi_Batang_Regular'
+            ]
+        },
+        'removePlugins': [
+            'WordCount', 
+            # 'MediaEmbed' 등 비활성화할 다른 플러그인 이름 추가
+        ]
+    },
+    'list': {
+        'properties': {
+            'styles': 'true',
+            'startIndex': 'true',
+            'reversed': 'true',
+        }
+    }
+}
+
+# Define a constant in settings.py to specify file upload permissions
+CKEDITOR_5_FILE_UPLOAD_PERMISSION = "any" # Possible values: "staff", "authenticated", "any"

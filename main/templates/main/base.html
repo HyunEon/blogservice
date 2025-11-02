@@ -5,44 +5,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- GSL cross-origin 설정-->
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <!-- https://fonts.google.com/icons?selected=Material+Icons:format_align_right:&icon.query=alignment&icon.size=16&icon.color=%231f1f1f&icon.style=Outlined -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'favicon/favicon-32x32.png' %}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'favicon/favicon-16x16.png' %}">
     {% block extra_head %}
     {% endblock %}
     <title>{% block title %}블로그{% endblock %}</title>
 </head>
 <body>
+    <!-- 헤더 -->
     <header class="main-header">
         <div class="header-container">
             <!-- 로그인 했으면 메인 페이지로 리다이렉트, 아니면 메인 페이지로-->
             {% if user_blog %}
-            <a href="{% url 'showblog' blog_id=user_blog.blog_id %}"class="blog-title-link">블로그</a>
+            <a href="{% url 'showblog' blog_slug=user_blog.slug %}"class="blog-title-link">블로그</a>
             {% else %}
             <a href="{% url 'showmain' %}"class="blog-title-link">블로그</a>
             {% endif %}
             <ul class="nav-menu">
-            {% block userinfo %}
-            <li class="nav-item">
-                <!-- 로그인 했으면 로그아웃으로 리다이렉트, 아니면 로그인으로-->
+                <!-- 로그인 시 프로필 활성화, 아니면 로그인 링크-->
                 {% if user.is_authenticated %}
-                <a class="nav-link" href="{% url 'logout' %}">{{ user.username }} (로그아웃)</a>
-                {% else %}
-                <a class="nav-link" href="{% url 'login' %}">로그인</a>
-                {% endif %}
-                <a class="nav-main" href="{% url 'showmain' %}">🏠 메인</a>
-            </li>
-            {% endblock %}
+                <div class="profile-menu">
+                    <button class="profile-button">
+                        <img src={{ user_blog.blog_user.profile_image.url }} alt="프로필" class="profile-img">
+                        <span class="arrow"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a href="{% url 'showmain' %}">메인</a></li>
+                        <li><a href="{% url 'updateprofile' %}">설정</a></li>
+                        <li><a href="{% url 'logout' %}">로그아웃</a></li>
+                        {% else %}
+                            <a class="nav-login" href="{% url 'login' %}?next={{ request.get_full_path }}">로그인</a>
+                        {% endif %}
+                    </ul>
+            </div>
         </ul>
         </div>
     </header>
 
+    <!-- 메시지 영역 -->
+    {% if messages %}
+    <div class="messages-container">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.level_tag }}">{{ message.message }}</div>
+    {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- 본문 콘텐츠 영역 -->
     <main class="main-content">
         {% block content %}
         {% endblock %}
     </main>
     
+    <!-- 푸터 -->
     <footer class="main-footer">
         <div class="footer-container">
             </div>
     </footer>
+
+    <!-- 스크립트 -->
+    <script src="{% static 'js/base.js' %}"></script>
 </body>
 </html>

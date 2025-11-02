@@ -1,18 +1,100 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import login, logout
+from django.contrib.auth import login, logout, get_user_model, authenticate
+from django.http import HttpResponse, HttpResponseBadRequest
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.utils import timezone
+from django.utils.text import slugify
 from django.urls import reverse
 from django.conf import settings
-from django.http import Http404
-from django.db.models import Q
+from django.http import Http404, JsonResponse
+from django.db import transaction, IntegrityError
+from django.db.models import Q, Max, Min
 from django.core.paginator import Paginator
+from django.core.files.base import ContentFile
 from .models import BlogInfo, PostContents, PostComments, BlogCategory
-from .forms import PostForm, CommentForm
-import uuid, os, re
+from .forms import PostForm, CommentForm, RegisterForm, UserUpdateForm
+from unidecode import unidecode
+import uuid, os, re, random, json, requests, datetime
+
+from google.oauth2 import id_token
+from google.auth.transport import requests as grequests
+
+User = get_user_model()
 
 # Create your views here.
+def showregister(request):
+    if request.method == "POST":
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            # 폼 유효성 검사를 통과했을 때, UserCreationForm 저장 및 블로그 객체 생성(둘 다 반드시 처리되어야 하므로 DB 트랜잭션으로 처리한다.)
+            try:
+                # DB 트랜잭션으로 처리
+                with transaction.atomic():
+                    # 사용자 객체 생성
+                    instance = form.save()
+                    # 블로그 객체 생성 및 슬러그 지정(슬러그: 사용자 ID)
+                    blog = BlogInfo.objects.create(blog_user=instance, slug=instance.username)
+                    # 블로그 카테고리 기본 생성
+                    BlogCategory.objects.create(
+                        category_index=1,
+                        category_name="내 글",
+                        category_for=blog,
+                        category_isdepth=False,
+                        category_depth_for=None,
+                        slug=slugify(unidecode("내 글"))
+                    )
+                    # django message - https://docs.djangoproject.com/en/5.0/ref/contrib/messages/
+                messages.success(request, "✅ 회원가입이 완료되었어요!")
+                return redirect(loginview)  # 가입 후 로그인 페이지 등으로 이동
+            except Exception as e:
+                messages.error(request, f"🚨 이런.. 회원가입 중 오류가 발생했어요!: {e}")
+    else:
+        form = RegisterForm()
+    return render(request, "main/register.html", {"form": form})
+
+# Google 회원가입/로그인, 기존 Django 세션과 연동에 문제가 있어, Custom 세션 사용.
+@csrf_exempt
+def googlelogin(request):
+    # 구글 로그인 버튼에서 받은 next 파라미터 빼기, 없으면 메인
+    next_url = request.GET.get('your_own_param_next', '/')
+    print(next_url)
+    if request.method != "POST":
+        return HttpResponseBadRequest("Only POST allowed")
+
+    credential = request.POST.get("credential")
+    if not credential:
+        return HttpResponseBadRequest("No credential provided", status=400)
+
+    try:
+        # 토큰 검증
+        idinfo = id_token.verify_oauth2_token(
+            credential,
+            grequests.Request(),
+            settings.GOOGLE_CLIENT_ID
+        )
+
+    except ValueError:
+        return HttpResponseBadRequest("Invalid token")
+
+    # authenticate 호출 (idinfo를 전달)
+    # Django는 settings.AUTHENTICATION_BACKENDS를 순회하며
+    # idinfo를 받는 authenticate 메소드를 찾아 실행합니다.
+    user = authenticate(request, idinfo=idinfo) 
+
+    if user is not None:
+        # authenticate가 성공하면 user 객체에 .backend 속성이 자동으로 붙음
+        login(request, user) 
+        messages.success(request, f"✅ {user.nickname}님, 환영합니다 😊")
+        # 사용자가 보고 있던 페이지가 있으면 해당 페이지로 리디렉트, 없으면 메인으로
+        return redirect(next_url)
+    else:
+        # 인증 실패
+        messages.error(request, "⚠️ 로그인에 실패했습니다. 유효하지 않은 사용자입니다.")
+        return redirect(loginview)
+
 def loginview(request):
     # 이미 로그인 되어 있으면 main으로 리다이렉트
     if request.user.is_authenticated:
@@ -24,7 +106,10 @@ def loginview(request):
             # 폼이 유효하면 사용자를 로그인시키고 메인 페이지로 리다이렉트
             user = form.get_user()
             login(request, user)
-            return redirect(showmain)
+            messages.success(request, f"✅ {user.nickname}님, 환영합니다 😊")
+            # 사용자가 보고 있던 페이지가 있으면 해당 페이지로 리디렉트, 없으면 메인으로
+            next_url = request.GET.get('next') or request.POST.get('next') or '/'
+            return redirect(next_url)
     else:
     # GET 요청이면 빈 로그인 폼을 보여줌
         form = AuthenticationForm()
@@ -33,269 +118,283 @@ def loginview(request):
 @login_required
 def logoutview(request):
     logout(request)
-    return redirect(showmain)
+    messages.info(request, "ℹ️ 로그아웃 했어요! 다음에 또 봐요 👋")
+    return redirect(loginview)
 
-@login_required
 def showmain(request):
-    # 우선 블로그 정보 가져와서 프론트에서 나눠서 보여주기
-    bloglist = BlogInfo.objects.all()
+    # 추천 블로그 3개 가져옴, 추후 첫 블로그와 마지막 블로그 인덱스 값을 가져와 랜덤한 값을 생성하는 로직을 적용
+    bloglist = BlogInfo.objects.all()[:3]
     return render(request, 'main/mainpage.html', {'bloglist': bloglist})
 
-def showblog(request, blog_id):
-    blog_info = get_object_or_404(BlogInfo, blog_id=blog_id)
-    all_categories = BlogCategory.objects.filter(category_for=blog_info)
-    posts_query = PostContents.objects.filter(post_blog=blog_info)
+@login_required
+def updateprofile(request):
+    if request.method == 'POST':
+        form = UserUpdateForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, '✅ 프로필을 성공적으로 아주 멋지게 수정했어요!')
+            return redirect(showmain)  # 수정 후 이동할 페이지
+    else:
+        form = UserUpdateForm(instance=request.user)
+
+    return render(request, 'main/settings/userprofile.html', {'form': form})
+
+# 하위 카테고리 찾는 로직
+def getsubcategories(category):
+    # 파라미터로 받은 카테고리의 하위 카테고리를 모두 가져옴
+    subcategories = list(category.subcategories.all())
+    # 하위 카테고리를 하나 씩 까보면서 자식이 있으면 리스트에 추가
+    for sub in category.subcategories.all():
+        subcategories.extend(getsubcategories(sub))
+    return subcategories
+
+def showblog(request, blog_slug, category_slug=None):
+    blog = get_object_or_404(BlogInfo, slug=blog_slug)
+    categories = BlogCategory.objects.filter(category_for=blog)
+
+    # 카테고리 분류가 있는지 필터링
+    if category_slug:
+        # category_slug를 전달 받았을 때
+        target_category = get_object_or_404(BlogCategory, slug=category_slug, category_for=blog)
+        # all_categories: 목표 카테고리 리스트 + 반환된 카테고리 리스트를 합침.
+        all_categories = [target_category] + getsubcategories(target_category)
+        # 카테고리 id만 리스트로 뽑아냄.
+        category_ids = [c.category_id for c in all_categories]
+        # 반복 가능한 값 뒤에 __in 붙이면 django가 sql 쿼리로 변환해 줄 때 IN 조건으로 붙여준다.
+        posts_query = PostContents.objects.filter(post_blog=blog, post_category__in=category_ids)
+    else:
+        # category_slug 없으면 블로그 전체 포스트 조회
+        posts_query = PostContents.objects.filter(post_blog=blog)
     
+    # 검색 쿼리가 있는지 필터링
     query = request.GET.get("q")
     if query:
         posts_query = posts_query.filter(post_title__icontains=query)
-
-    # 모든 필터링이 끝난 최종 쿼리셋을 정렬합니다.
+    # 필터링 된 포스트를 최신 날짜 순으로 정렬함.
     final_posts = posts_query.order_by('-post_date')
-    
-    # --- 페이지네이션 로직 시작 ---
-    
-    # 1. URL의 query string에서 'per_page' 값을 가져옵니다. 없으면 기본값으로 3을 사용합니다.
+
+    # URL의 쿼리에서 'per_page' 파라미터 값 가져옴.
     posts_per_page = request.GET.get('per_page', 3)
-    
-    # 2. Paginator 객체를 생성합니다. (전체 포스트 리스트, 한 페이지당 보여줄 포스트 개수)
+    # 1. Paginator 객체를 생성합니다. (전체 포스트 리스트, 한 페이지당 보여줄 포스트 개수)
     paginator = Paginator(final_posts, posts_per_page)
-    
-    # 3. URL의 query string에서 'page' 값을 가져옵니다. 없으면 1페이지를 봅니다.
+    # 2. URL의 query string에서 'page' 값을 가져옵니다. 없으면 1페이지를 봅니다.
     page_number = request.GET.get('page', 1)
     
-    # 4. 요청된 페이지에 해당하는 포스트 목록을 page_obj에 담습니다.
-    #    .get_page()는 존재하지 않는 페이지 번호 등 예외를 안전하게 처리해 줍니다.
+    # 3. 요청된 페이지에 해당하는 포스트 목록을 page_obj에 담습니다.
+    # .get_page()는 존재하지 않는 페이지 번호 등 예외를 안전하게 처리해 줍니다.
+    # 위에 수 많은 필터 구문때문에 실제로 여러 번 쿼리를 날릴 것 같지만, 
+    # Django ORM이 즉시 수행하지 않고 마지막으로 데이터가 필요할 때(evaluate될 때) 한 번만 실행된다!
     page_obj = paginator.get_page(page_number)
     
-    # --- 페이지네이션 로직 끝 ---
-    
     context = {
+        'blog': blog,
         'posts': page_obj, 
-        'categories': all_categories,
-        'blog_info': blog_info,
+        'categories': categories,
+        'category_slug': category_slug,
     }
     
-    return render(request, 'main/blogpage.html', context)
+    return render(request, 'main/blog/blogpage.html', context)
 
-@login_required
-def showpostdetail(request, blog_id, post_id):
-    post = get_object_or_404(PostContents, post_id = post_id, post_blog = blog_id)
-    category = get_object_or_404(BlogCategory, category_id = post.post_category)
-    comments = PostComments.objects.filter(comment_post = post_id).order_by('comment_order', 'comment_date')
+def showpostdetail(request, blog_slug, post_slug):
+    # blog 객체 가져오기
+    blog = get_object_or_404(BlogInfo, slug=blog_slug)
+    # slug로 포스트 조회 (해당 블로그 소속인지도 확인)
+    post = get_object_or_404(PostContents, slug=post_slug, post_blog=blog)
+    # 포스트 카테고리 조회
+    category = post.post_category
+    # 댓글 목록 조회
+    comments = PostComments.objects.filter(comment_post=post).order_by('comment_order', 'comment_date')
+
+    # 댓글 폼 생성
+    if request.user.is_authenticated:
+        form = CommentForm(post=post, editor=request.user.bloginfo)
+    else:
+        form = None  # 비로그인 사용자는 폼 표시 안함
+
+    context = {
+        'blog': blog,
+        'post': post, 
+        'category': category, 
+        'comments': comments,
+        'form': form,
+    }
     
-    return render(request, 'main/post/postdetail.html', {'post': post, 'category': category, 'comments': comments})
-
-'''@login_required
-def showblog(request, blog_id, category_id=None):
-    # 블로그 컨텐츠
-    blog_info = get_object_or_404(BlogInfo, blog_id=blog_id)
-    # 블로그 전체 카테고리
-    if category_id != None:
-        categorys = BlogCategory.objects.filter(category_for=blog_info).all(),
-        categorys = BlogCategory.objects.filter(category_for=blog_info).all()
-    if category_id:
-        # 해당 카테고리와 그 하위 카테고리까지 모두 선택합니다.
-        target_categories = BlogCategory.objects.filter(
-            Q(pk=category_id) | Q(category_depth_for=category_id)
-        )
-        # 쿼리셋에 카테고리 필터를 추가합니다.
-        posts = posts.filter(post_category_for__in=target_categories)
-        
-    # 사용자가 입력한 쿼리가 있으면 가져와서 필터링 함.
-    query = request.GET.get("q", None)
-    if query:
-        posts = PostContents.objects.filter(
-            post_blog=blog_info,  # 해당 블로그의 포스트만
-            post_title__icontains=query # 제목에 검색어가 포함된 것
-        ).order_by('-post_date')
-    else:
-        # 쿼리가 없으면 포스트를 모두 가져옴
-        posts = PostContents.objects.filter(post_blog=blog_info).order_by('-post_date')
-        # 포스트, 카테고리, 블로그 정보를 던져줌.
-    return render(request, 'main/blogpage.html', {'posts': posts, 'categorys': all_categorys, 'blog_info': blog_info})'''
-
-'''@login_required
-def showblog(request, blog_id):
-    # 블로그 컨텐츠
-    blog_info = get_object_or_404(BlogInfo, blog_id=blog_id)
-    # 블로그 카테고리
-    categorys = BlogCategory.objects.filter(category_for=blog_info).all()
-    # 사용자가 입력한 쿼리가 있으면 가져와서 필터링 함.
-    query = request.GET.get("q", None)
-    if query:
-        posts = PostContents.objects.filter(
-            post_blog=blog_info,  # 해당 블로그의 포스트만
-            post_title__icontains=query # 제목에 검색어가 포함된 것
-        ).order_by('-post_date')
-    else:
-        # 쿼리가 없으면 포스트를 모두 가져옴
-        posts = PostContents.objects.filter(post_blog=blog_info).order_by('-post_date')
-
-    # 5. 템플릿에 'blog_info' 객체를 함께 전달하면 템플릿에서 블로그 제목 등을 표시할 수 있습니다.
-    return render(request, 'main/postpage.html', {'posts': posts, 'categorys': categorys, 'blog_info': blog_info})'''
+    return render(request, 'main/blog/post/postdetail.html', context)
 
 @login_required
-def showpostbycategory(request, blog_id, category_id):
-    blog_info = get_object_or_404(BlogInfo, blog_id=blog_id)
-    # 카테고리 란에 들어갈 카테고리를 리턴해 줌, 어떤 포스트를 보든 표시되어야 하기 때문에 반드시 필요함
-    categorys = BlogCategory.objects.all().filter(category_for = blog_id)
-    # 해당 카테고리의 하위 카테고리가 있다면 가져와서 ID만 잘라냄, Q객체를 사용해서 OR 조건을 표기할 수 있음
-    target_categories = BlogCategory.objects.all().filter(Q(category_id = category_id) | Q(category_depth_for = category_id)).values_list('category_id', flat=True)
-    posts = PostContents.objects.all().filter(post_category_for__in = target_categories).order_by('-post_date') # 작성된 날짜 순으로 정렬
-
-    return render(request, 'main/postpage.html/', {'posts': posts, 'categorys': categorys})
-
-@login_required
-def create_post(request):
-    user_id = request.user.id
-    blog_id = get_object_or_404(BlogInfo, blog_user = user_id).blog_id # 더미 데이터
-    categories = BlogCategory.objects.all().filter(category_for = blog_id)
-
+def createpost(request):
+    blog = get_object_or_404(BlogInfo, blog_user = request.user.id)
     if request.method=="POST":
-        form = PostForm(request.POST)
-        form.data = form.data.copy()
-        form.data['post_id'] = uuid.uuid4()
-        form.data['post_editor_uid'] = user_id
-        #form.data['post_editdate'] = None
-
-        if form.is_valid():
-            post = form.save(commit=False) # 폼 임시 저장
-            post.save()
-            return redirect(showblog)
-        else:
-            print(form.errors)
-            form = PostForm() # 유효성 검사 실패 시 빈칸으로
-    else: #Get 일 때
-        form = PostForm()
-    return render(request, 'main/editpost.html/', {'form': form, 'categories': categories})
-
-@login_required
-def edit_post(request, post_id):
-    user_id = request.user.id
-    blog_id = get_object_or_404(BlogInfo, blog_user = user_id).blog_id
-    categories = BlogCategory.objects.all().filter(category_for = blog_id)
-    targetpost = get_object_or_404(PostContents, post_id=post_id)
-
-    if request.method == 'POST':
-        form = PostForm(request.POST, instance=targetpost)
-        # 폼에서 id와 editor_uid를 필수로 지정했기 때문에 해당 필드들을 다시 입력해준다
-        form.data = form.data.copy()
-        form.data['post_id'] = targetpost.post_id
-        form.data['post_editor_uid'] = targetpost.post_editor_uid
-
+        form = PostForm(request.POST, blog=blog)
         if form.is_valid():
             post = form.save(commit=False)
-            post.post_editdate = timezone.now()
-            post.save()
-            return redirect(showpostdetail, post_id = post_id)
+            try:
+                # DB 트랜잭션으로 처리
+                with transaction.atomic():
+                    # 블로그 객체 연결
+                    post.post_blog = blog
+                    # uuid 앞 8자리로 생성
+                    post.slug = str(uuid.uuid4())[:8]
+                    post.save()
+                    messages.success(request, "✅ 포스트를 작성했어요!")
+                return redirect(showblog, blog_slug=blog.slug)  # 블로그 페이지로 이동
+            except Exception as e:
+                messages.error(request, f"🚨 이런.. 포스트 작성 중 오류가 발생했어요: {e}")    
+                form = PostForm() # 실패 시 빈칸으로        
         else:
             print(form.errors)
-    else:
-        form = PostForm(instance=targetpost)
-    
-    return render(request, 'main/editpost.html', {'form': form, 'categories': categories})
+            pass
+    else: #Get 일 때
+        form = PostForm(blog=blog)
+
+    context = {
+        'form': form,
+    }
+
+    return render(request, 'main/blog/post/editpost.html/', context)
 
 @login_required
-def delete_post(request, post_id):
-    targetpost = get_object_or_404(PostContents, post_id=post_id)
+def editpost(request, blog_slug, post_slug):
+    blog = get_object_or_404(BlogInfo, slug=blog_slug)
+    post = get_object_or_404(PostContents, slug=post_slug, post_blog=blog)
+
+    if request.user != post.post_blog.blog_user:
+        raise PermissionDenied("이 포스트를 수정할 권한이 없습니다.")
+        messages.error(request, "❌ 이 포스트를 수정할 권한이 없습니다.")
+        return redirect('showpostdetail', blog_slug=blog_slug, post_slug=post_slug)
 
     if request.method == 'POST':
+        try:
+            # DB 트랜잭션으로 처리
+            with transaction.atomic():
+                form = PostForm(request.POST, instance=post, blog=blog)
+                if form.is_valid():
+                    post = form.save(commit=False)
+                    post.post_editdate = timezone.now()
+                    post.save()
+                    messages.success(request, f"✅ \"{post.post_title}\" 글을 성공적으로 수정했어요!")
+                return redirect('showpostdetail', blog_slug=blog.slug, post_slug=post.slug)
+        except Exception as e:
+                messages.error(request, f"🚨 이런.. 글 수정 중 오류가 발생했어요: {e}")    
+                form = PostForm() # 실패 시 빈칸으로
+                return redirect('showpostdetail', blog_slug=blog_slug, post_slug=post_slug)
+    else:
+        form = PostForm(instance=post, blog=blog)
+    return render(request, 'main/blog/post/editpost.html/', {'form': form})
 
-        # 포스트에 삽입된 이미지 삭제 로직
-        media_root = settings.MEDIA_ROOT
-        image_urls = re.findall(r'\/uploads\/[^\s\'\"]+', targetpost.post_contents)
-        
-        print("Extracted Image URL:", image_urls)
+@login_required
+def deletepost(request, blog_slug, post_slug):
+    # 블로그 및 포스트 가져오기
+    blog = get_object_or_404(BlogInfo, slug=blog_slug)
+    targetpost = get_object_or_404(PostContents, slug=post_slug, post_blog=blog)
 
-        for url in image_urls:
-            image_path = os.path.join(media_root, url.lstrip('/'))
-            print("Path:", image_path)
-            if os.path.exists(image_path):
-                os.remove(image_path)
+    # 작성자만 삭제 가능하도록
+    if request.user != targetpost.post_blog.blog_user:
+        raise PermissionDenied("이 포스트를 삭제할 권한이 없습니다.")
+        messages.error(request, "❌ 이 포스트를 삭제할 권한이 없습니다.")
+        return redirect('showpostdetail', blog_slug=blog_slug, post_slug=post_slug)
+
+    if request.method == 'POST':
+        try:
+            # DB 트랜잭션으로 처리
+            with transaction.atomic():
+                # 댓글 삭제
+                PostComments.objects.filter(comment_post=targetpost).delete()
+                # 포스트 삭제
+                targetpost.delete()
+                print(f"삭제된 포스트: {targetpost.post_title}")
+                messages.success(request, f"✅ \"{targetpost.post_title}\" 글을 성공적으로 삭제했어요!")
+        except Exception as e:
+                messages.error(request, f"🚨 이런.. 글 삭제 중 오류가 발생했어요: {e}")    
+                form = PostForm() # 실패 시 빈칸으로
+                return redirect('showpostdetail', blog_slug=blog_slug, post_slug=post_slug)
+    # 해당 블로그의 포스트 목록 페이지로 리다이렉트
+    return redirect('showblog', blog_slug=blog.slug)
+
+@login_required
+def createcomment(request, blog_slug, post_slug):
+    if request.method != 'POST':
+        messages.error(request, "🚨 댓글 작성은 POST 방식으로만 가능합니다.")
+        return redirect('showpostdetail', blog_slug=blog_slug, post_slug=post_slug)
+
+    # blog, post 가져오기
+    blog = get_object_or_404(BlogInfo, slug=blog_slug)
+    post = get_object_or_404(PostContents, slug=post_slug, post_blog=blog)
+
+    # 수정 여부인지 확인
+    comment_id = request.POST.get('comment_id')
+    targetcomment = None
+
+    # 부모 댓글 여부 확인 (답글인지)
+    parent_comment_id = request.POST.get('parent_comment_id')
+    parent_comment = None
+
+    if comment_id:
+        try:
+            targetcomment = PostComments.objects.get(pk=comment_id)
+        except PostComments.DoesNotExist:
+            messages.error(request, "❌ 수정 대상 댓글이 존재하지 않습니다.")
+            return redirect('showpostdetail', blog_slug=blog_slug, post_slug=post_slug)
+
+    if parent_comment_id:
+        try:
+            parent_comment = PostComments.objects.get(pk=parent_comment_id)
+        except PostComments.DoesNotExist:
+            messages.error(request, "❌ 답글 대상 댓글이 존재하지 않습니다.")
+            return redirect('showpostdetail', blog_slug=blog_slug, post_slug=post_slug)
+
+    # 폼 생성
+    form = CommentForm(
+        request.POST,
+        post=post,
+        editor=request.user.bloginfo,
+        parent_comment=parent_comment,
+        comment_id=targetcomment,
+    )
+
+    try:
+        with transaction.atomic():
+            if form.is_valid():
+                form.save()
+                if parent_comment:
+                    messages.success(request, "💬 답글이 등록되었습니다.")
+                else:
+                    messages.success(request, "✅ 댓글이 등록되었습니다.")
             else:
-                print(f"Image not found: {image_path}")
-        
-        # 포스트에 달린 댓글 삭제
-        PostComments.objects.all().filter(comment_postadress = post_id).delete()
+                messages.error(request, "🚨 댓글 작성 중 문제가 발생했습니다.")
+                print(form.errors)
+    except Exception as e:
+        messages.error(request, f"🚨 댓글 등록 중 오류가 발생했습니다: {e}")
 
-        # 포스트 삭제
-        targetpost.delete()
-
-        return redirect(showpost)
-    
-    return render(request, 'main/postview.html', {'posts': targetpost})
+    return redirect('showpostdetail', blog_slug=blog_slug, post_slug=post_slug)
 
 @login_required
-def createcomment(request, post_id):
-    user_id = request.user.id
-    # 댓글이 없는 글이면 order는 0부터 시작, 있으면 마지막 댓글 order + 1
+def deletecomment(request, blog_slug, post_slug):
+    if request.method != 'POST':
+        messages.error(request, "🚨 삭제 요청은 POST 방식으로만 처리됩니다.")
+        return redirect('showpostdetail', blog_slug=blog_slug, post_slug=post_slug)
+
+    blog = get_object_or_404(BlogInfo, slug=blog_slug)
+    post = get_object_or_404(PostContents, slug=post_slug, post_blog=blog)
+
+    # POST에서 comment_id 받아오기
+    comment_id = request.POST.get('comment_id')
+    if not comment_id:
+        messages.error(request, "❌ 삭제할 댓글 ID가 전달되지 않았습니다.")
+        return redirect('showpostdetail', blog_slug=blog_slug, post_slug=post_slug)
+
+    comment_to_delete = get_object_or_404(PostComments, pk=comment_id)
+
+    if comment_to_delete.comment_editor != request.user.bloginfo:
+        messages.error(request, "❌ 댓글 작성자만 삭제할 수 있습니다.")
+        return redirect('showpostdetail', blog_slug=blog_slug, post_slug=post_slug)
+
     try:
-        targetpostcomment = PostComments.objects.all().filter(comment_postadress=post_id).latest('comment_date')
-        comment_order = targetpostcomment.comment_order + 1
-    except PostComments.DoesNotExist:
-        comment_order = 0
+        with transaction.atomic():
+            comment_to_delete.comment_isdelete = True
+            comment_to_delete.save()
+            messages.success(request, "🗑️ 댓글이 성공적으로 삭제되었습니다.")
+    except Exception as e:
+        messages.error(request, f"🚨 댓글 삭제 중 오류가 발생했어요: {e}")
 
-    if request.method == 'POST':
-        form = CommentForm(request.POST)
-        form.data = form.data.copy()
-        form.data['comment_id'] = uuid.uuid4()
-        form.data['comment_editor_uid'] = user_id
-        form.data['comment_postadress'] = post_id
-        form.data['comment_order'] = comment_order
-
-        if form.is_valid():
-            form.save()
-            # reverse 함수를 써서 url에 파라미터를 넣어 리다이렉트 할 수 있었다..
-            return redirect(reverse('showpostdetail', args=[post_id])) # 성공 페이지로 리다이렉트
-        else:
-            print(form.errors)
-    else:
-        form = CommentForm()
-        
-    return render(request, 'main/postview.html/', {'form': form, 'post_id': post_id})
-
-# 답글 작성하는 view
-@login_required
-def createreplycomment(request, post_id, comment_id):
-    user_id = request.user.id
-    # 해당 댓글의 마지막 댓글 order를 가져옴
-    try:
-        targetpostcomment = PostComments.objects.all().filter(comment_postadress = post_id, comment_id = comment_id).latest('comment_date')
-        comment_order = targetpostcomment.comment_order
-    except:
-        raise Http404("The comment does not exist.")
-
-    if request.method == 'POST':
-        form = CommentForm(request.POST)
-        form.data = form.data.copy()
-        form.data['comment_id'] = uuid.uuid4()
-        form.data['comment_editor_uid'] = user_id
-        form.data['comment_postadress'] = post_id
-        form.data['comment_order'] = comment_order
-        form.data['comment_isreply'] = True
-        form.data['comment_replyto'] = comment_id
-
-        if form.is_valid():
-            form.save()
-            # reverse 함수를 써서 url에 파라미터를 넣어 리다이렉트 할 수 있었다..
-            return redirect(reverse('showpostdetail', args=[post_id])) # 성공 페이지로 리다이렉트
-        else:
-            print(form.errors)
-    else:
-        form = CommentForm()
-        
-    return render(request, 'main/postview.html/', {'form': form, 'post_id': post_id})
-
-@login_required
-def deletecomment(request, post_id, comment_id):
-    targetcomment = get_object_or_404(PostComments, comment_id = comment_id)
-
-    # 댓글 삭제의 경우, 내용 및 옵션 변경 처리/ 추후 관련 댓글까지 모두 삭제하도록 하는 것이 더 나을지 고민해봐야겠다
-    if request.method == 'POST':
-        targetcomment.comment_contents = "삭제된 댓글입니다."
-        targetcomment.comment_isdelete = True
-        targetcomment.save()
-        return redirect(reverse('showpostdetail', args=[post_id])) # 성공 페이지로 리다이렉트
-    
-    return redirect(reverse('showpostdetail', args=[post_id]))
+    return redirect('showpostdetail', blog_slug=blog_slug, post_slug=post_slug)

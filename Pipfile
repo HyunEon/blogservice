@@ -4,7 +4,23 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+django-session-timeout = "*"
+gunicorn = "*"
+pillow = "*"
+django-ckeditor-5 = "*"
+unidecode = "*"
+psycopg = {extras = ["binary"], version = "*"}
+psycopg2-binary = "*"
 django = "*"
+django-auth = "*"
+jwt = "*"
+google-auth = "*"
+requests = "*"
+django-storages = "*"
+boto3 = "*"
+fastapi = "*"
+uvicorn = "*"
+python-multipart = "*"
 
 [dev-packages]
 

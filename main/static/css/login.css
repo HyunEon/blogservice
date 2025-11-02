@@ -47,7 +47,7 @@ label {
     font-weight: 600;
     text-align: center;
     color: #fff;
-    background-color: #007bff;
+    background-color: var(--color-primary);
     border: none;
     border-radius: 4px;
     cursor: pointer;
@@ -55,5 +55,30 @@ label {
 }
 
 .btn:hover {
-    background-color: #0056b3;
+    background-color: var(--color-primary-hover);
+}
+
+.g_id_container{
+    display: flex;
+    justify-content: left;
+    margin-top: 14px;
+}
+
+.nav-register {
+    display: block;
+    padding: 0.75rem;
+    margin-top: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    color: var(--color-primary);
+    background-color: var(--color-secondary);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.nav-register:hover {
+    background-color: var(--color-secondary-hover);
 }

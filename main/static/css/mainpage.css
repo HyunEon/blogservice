@@ -5,14 +5,14 @@
    padding: 2rem;
 }
 
-.mainpage-header {
+.mainpage-header-new-blogs {
    text-align: center;
    margin-bottom: 2rem;
    word-spacing: 2px;
    overflow: hidden;
 }
 
-.mainpage-header h2 {
+.mainpage-header-new-blogs h2 {
    font-size: 1.8rem;
    font-weight: bold;
    color: #333;
@@ -26,6 +26,15 @@
    display: grid;
    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
    gap: 1.5rem;
+}
+
+.blog-list-no-blog {
+   display: block;
+   padding: 2rem;
+   font-size: 1.4rem;
+   border-radius: var(--radius);
+   color: #777;
+   animation: bounce 1s infinite;
 }
 
 .blog-card {
@@ -68,4 +77,10 @@
   100% {
     transform: translateY(0);
   }
+}
+
+/* 바운스 애니메이션 */
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
 }

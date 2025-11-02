@@ -1,0 +1,28 @@
+/* 오류 전체 컨테이너 */
+.form-errors {
+    background-color: #ffe6e6; /* 연한 빨강 배경 */
+    border: 1px solid #ff4d4f; /* 진한 빨강 테두리 */
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* 개별 필드 오류 */
+.form-errors .field-error {
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+}
+
+/* 필드 라벨 강조 */
+.form-errors .field-error strong {
+    color: #d4380d; /* 진한 빨강 */
+    margin-right: 6px;
+}
+
+/* 넌필드 오류 */
+.form-errors .non-field-error {
+    font-weight: 500;
+    color: #a8071a; /* 조금 더 진하게 */
+    margin-top: 8px;
+}

@@ -1,0 +1,181 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block title %}{{ post.post_title }}{% endblock %}
+
+{% block extra_head %}
+    <!-- CSS -->
+    <link rel="stylesheet" href="{% static 'css/blog/post/postdetail.css' %}">
+    <link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/47.1.0/ckeditor5.css" />
+    <!-- JS -->
+    <script src="{% static 'js/post/postdetail.js' %}"></script>
+
+    <!-- SEO를 위한 메타 태그 -->
+    <meta name="description" content="{{ post.post_contents|striptags|truncatechars:150 }}">
+    <meta name="author" content="{{ post.post_blog.blog_user.username }}">
+    <link rel="canonical" href="{{ request.build_absolute_uri }}">
+
+    <!-- 소셜 미디어 공유를 위한 Open Graph 태그 -->
+    <meta property="og:title" content="{{ post.post_title }}">
+    <meta property="og:description" content="{{ post.post_contents|striptags|truncatechars:150 }}">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <meta property="og:type" content="article">
+    <!-- <meta property="og:image" content="포스트 대표 이미지 URL"> -->
+
+    <!-- 검색 엔진에 콘텐츠의 의미를 명확히 전달하는 구조화된 데이터 (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "{{ post.post_title }}",
+      "description": "{{ post.post_contents|striptags|truncatechars:150 }}",
+      "datePublished": "{{ post.post_date|date:'c' }}",
+      "author": {
+        "@type": "Person",
+        "name": "{{ post.post_blog.blog_user.username }}"
+      }
+    }
+    </script>
+    
+{% endblock %}
+
+{% block content %}
+<div class="post-container">
+    <!-- 시맨틱한 article 태그로 포스트 전체를 감쌉니다 -->
+    <article class="post-article">
+        <!-- 포스트 헤더: 제목, 메타 정보 -->
+        <header class="post-header" style="text-align: {{ post.title_align }}">
+            <a href="{% url 'showblogbycategory' blog_slug=post.post_blog.slug category_slug=category.slug %}" class="post-category">{{ category.category_name }}</a>
+            <h1 class="post-title">{{ post.post_title }}</h1>
+            <div class="post-meta">
+                <img src="{{ post.post_blog.blog_user.profile_image.url }}" alt="프로필" class="profile-img">
+                <span class="meta-author">{{ post.post_blog.blog_user.nickname }}</span>
+                <span class="meta-divider">·</span>
+                <time class="meta-date" datetime="{{ post.post_date|date:'c' }}">{{ post.post_date|date:"Y년 m월 d일 H:i" }}</time>
+            </div>
+        </header>
+
+        <!-- 포스트 본문 -->
+         <div class="ck-content">
+            {{ post.post_contents|safe }}
+        </div>
+        
+        <!-- 포스트 푸터: 태그, 공유 버튼 등 -->
+        <footer class="post-footer">
+            <div class="action-buttons">
+                <a href="{% url 'showblog' blog_slug=post.post_blog.slug %}" class="btn btn-list">&larr; 목록으로</a>
+                <!-- 글 작성자에게만 수정/삭제 버튼이 보이도록 처리 -->
+                {% if user == post.post_blog.blog_user %}
+                <div class="edit-delete-buttons">
+                    <a href="{% url 'editpost' blog_slug=post.post_blog.slug post_slug=post.slug %}" class="btn btn-edit">✏️ 수정</a>
+                    <form method="post" action="{% url 'deletepost' blog_slug=blog.slug post_slug=post.slug %}" onsubmit="return confirm('글을 삭제하시겠습니까?');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-delete">❌ 삭제</button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+        </footer>
+
+    </article>
+
+    <!-- 댓글 섹션 -->
+    <section class="comment-section">
+        <h2 class="comment-title">댓글 ({{ comments.count }})</h2>
+        
+        <!-- 댓글 목록 -->
+        <div class="comment-list">
+            {% for comment in comments %}
+            <div class="comment-item {% if comment.comment_isreply %}is-reply{% endif %}" id="comment-{{ comment.comment_id }}">
+                <div class="comment-author">
+                    {% if comment.comment_editor.blog_user %}
+                    <div class = "author-info">
+                        {% if not comment.comment_isdelete %}
+                        <img src="{{ comment.comment_editor.blog_user.profile_image.url }}" alt="프로필 이미지" class="comment-profile-img">
+                        <span>{{ comment.comment_editor.blog_user.nickname }}</span>
+                        {% endif %}
+                    </div>
+                    {% else %}
+                        <span>탈퇴한 사용자 💀</span>
+                    {% endif %}
+                    <!-- 본인 댓글에만 더보기 버튼 -->
+                    {% if not comment.comment_isdelete and user.is_authenticated and comment.comment_editor == user_blog %}
+                    <div class="comment-more-menu">
+                        <button type="button" class="more-btn" data-comment-id="{{ comment.comment_id }}">
+                            <span class="material-icons">more_horiz</span>
+                        </button>
+                        <div class="more-menu hidden" id="more-menu-{{ comment.comment_id }}">
+                            <a href="#" class="comment-edit-btn" data-comment-id="{{ comment.comment_id }}">수정</a>
+                            <!-- 댓글 삭제 템플릿 -->
+                            <form method="post" action="{% url 'deletecomment' blog_slug=post.post_blog.slug post_slug=post.slug %}" onsubmit="return confirm('댓글을 삭제하시겠습니까?');">
+                                {% csrf_token %}
+                                <input type="hidden" name="comment_id" value="{{ comment.comment_id }}">
+                                <button type="submit" class="comment-delete-btn">삭제</button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="comment-content">
+                    {% if not comment.comment_isdelete %}
+                    {% if comment.mention %}
+                            <span class="mention">@{{ comment.mention.nickname }}</span>
+                        {% endif %}
+                        <div class="comment-body">
+                            {{ comment.comment_contents|linebreaks }}
+                        </div>
+                    {% else %}
+                        <p>삭제된 댓글입니다.</p>
+                    {% endif %}
+                </div>
+                <div class="comment-actions">
+                    {% if not comment.comment_isdelete %}
+                    <time>{{ comment.comment_date|date:"y.m.d H:i" }}</time>
+                    {% endif %}
+                    {% if not comment.comment_isdelete and user.is_authenticated %}
+                        <a class="comment-reply-btn" data-comment-id="{{ comment.comment_id }}" data-mention-id="{{ comment.comment_editor.blog_user.id }}" data-nickname="{{ comment.comment_editor.blog_user.nickname }}">답글</a>
+                    {% endif %}
+                </div>
+            </div>
+            <!-- 답글, 수정 템플릿 -->
+            <div id="comment-edit-reply-form-template" style="display: none;">
+                <form method="post" action="{% url 'createcomment' blog_slug=post.post_blog.slug post_slug=post.slug %}" id="comment-edit-reply-form" class="comment-edit-reply-form">
+                    <span class="mention-to-user"></span>
+                    {% csrf_token %}
+                    <div class="comment-form-contents">
+                        <img src="{{ user_blog.blog_user.profile_image.url }}" alt="프로필" class="profile-img">
+                        <textarea name="comment_contents" class="edit-textarea" required></textarea>
+                    </div>
+                    <div class="comment-edit-reply-buttons"> 
+                        <button type="submit" class="save-edit-btn">댓글 등록</button>
+                        <button type="button" class="cancel-edit-btn">취소</button>
+                    </div>
+                    <!-- comment_id hidden 전달 -->
+                    <input type="hidden" name="parent_comment_id" id="parent-comment-id"  value="{{ comment.comment_id }}">
+                    <input type="hidden" name="mention" id="mention_id">
+                    <input type="hidden" name="comment_id" value="">
+                </form>
+            </div>
+        {% empty %}
+            <p class="no-comments">아직 댓글이 없습니다. 첫 댓글을 남겨보세요!</p>
+        {% endfor %}
+    </div>
+        <!--댓글 작성 폼 -->
+        <div class="comment-form-container">
+            <form action="{% url 'createcomment' blog_slug=blog.slug post_slug=post.slug %}" method="post">
+                {% csrf_token %}
+                {% include "main/form_errors.html" %}
+                <div class="comment-form-contents">
+                    {% if user.is_authenticated %}
+                    <img src={{ user_blog.blog_user.profile_image.url }} alt="프로필" class="profile-img">
+                    {{ form.comment_contents }}
+                    {% else %}
+                    <span>로그인 후 댓글을 작성할 수 있습니다!</span>
+                    {% endif %}
+                </div>
+                <button type="submit"{% if not user.is_authenticated %}disabled title="로그인 후 사용 가능합니다"{% endif %}>댓글 등록</button>
+            </form>
+        </div>
+    </section>
+</div>
+{% endblock %}
