@@ -22,9 +22,9 @@
 
 /* 포스트 본문 <article> 스타일 */
 .post-article {
-    background-color: #fff;
+    background-color: var(--background-color-widget);
     border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 12px rgba(var(--primary-rgb),0.05);
     padding: 40px;
 }
 
@@ -52,7 +52,7 @@
     align-items: center; /* 수직 중앙 정렬 */
     gap: 6px;
     font-size: 0.9rem;
-    color: #6c757d;
+    color: var(--text-color);
 }
 
 .post-meta .profile-img {
@@ -81,6 +81,7 @@
 
 /* ckeditor 본문 */
 .ck-content {
+    color: var(--text-color) !important;
     overflow: hidden;
 }
 
@@ -164,12 +165,12 @@
 }
 .btn-edit:hover { background-color: #138496; }
 .btn-delete {
-    background-color: #dc3545; 
+    background-color: var(--color-delete);
     color: white;
     height: 100%;
     font-size: 1rem;
 }
-.btn-delete:hover { background-color: #c82333; }
+.btn-delete:hover { background-color: var(--color-delete-hover); }
 
 :root {
     --light-gray: #f8f9fa;
@@ -184,6 +185,10 @@
     font-family: var(--basic-font), sans-serif;
 }
 
+.comment-section h2 {
+    color: var(--text-color);
+}
+
 /* 댓글 제목 */
 .comment-title {
     font-size: 1.4rem;
@@ -196,14 +201,14 @@
 
 /* 댓글 작성 폼 */
 .comment-form-container {
-    background-color: #fff;
-    border: 1px solid var(--border-color);
+    background-color: var(--background-color-widget);
+    /* border: 1px solid var(--color-border); */
     border-radius: 8px;
     height: auto;
     padding: 20px;
     margin-top: 20px;
     margin-bottom: 40px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 6px rgba(var(--primary-rgb), 0.05);
 }
 
 .comment-form-contents {
@@ -222,10 +227,13 @@
     width: 100%;
     font-size: 0.95rem;
     font-family: var(--basic-font);
-    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    border: 1px solid var(--color-border);
+    /* border: 1px solid var(--border-color); */
     border-radius: 6px;
     padding: 10px;
     resize: none;
+    background-color: transparent;
     transition: border-color 0.2s, box-shadow 0.2s;
 }
 
@@ -250,7 +258,7 @@
 }
 
 .comment-form-container button:hover {
-    background-color: #0056b3;
+    background-color: var(--color-primary-hover);
     transform: translateY(-1px);
 }
 
@@ -260,13 +268,79 @@
     background-color: #ccc;
 }
 
+.post-reactions {
+    display: flex;
+    justify-content: left;
+    margin-top: 10px;
+    width: fit-content;
+    border-radius: var(--border-radius);
+    background-color: transparent;
+}
+
+.like-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: none;
+    border: none;
+    color: var(--text-color, #444);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    padding: 4px 8px;
+    border-radius: var(--button-radius);
+}
+
+.like-btn:hover {
+    background-color: rgba(var(--primary-rgb), 0.05);
+    transform: scale(1.05);
+}
+
+.like-btn:active {
+    transform: scale(0.95);
+}
+
+.like-btn:disabled:hover,
+.like-btn:disabled:active {
+    cursor: not-allowed;
+    transform: none;
+    background-color: transparent;
+}
+
+.like-btn .material-symbols-outlined {
+    font-size: 26px;
+    transition: color 0.25s ease, transform 0.25s ease;
+    font-variation-settings:
+        'FILL' 0,
+        'wght' 0,
+        'GRAD' 0,
+        'opsz' 20
+    }
+
+.like-btn.liked .material-symbols-outlined {
+    color: var(--color-like-button);
+    transform: scale(1.2);
+    font-variation-settings:
+        'FILL' 1,
+        'wght' 0,
+        'GRAD' 0,
+        'opsz' 20
+    }
+
+.like-btn.liked .like-count {
+  color: var(--color-like-button);
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
 /* 댓글 목록 */
 .comment-item {
-    background-color: #fff;
-    border: 1px solid var(--border-color);
+    background-color: var(--background-color-widget);
+    /* border: 1px solid var(--color-border); */
     border-radius: 8px;
     padding: 16px 20px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    box-shadow: 0 4px 12px rgba(var(--primary-rgb),0.03);
+    margin-top: 0.2rem;
 }
 
 .comment-profile-img {
@@ -280,7 +354,8 @@
     align-items: center;
     font-weight: 600;
     margin-bottom: 6px;
-    color: #333;
+    color: var(--text-color);
+    /* color: #333; */
     justify-content: space-between;
 }
 
@@ -305,7 +380,7 @@
     margin: 0;
     font-size: 0.95rem;
     line-height: 1.6;
-    color: #444;
+    color: var(--text-color);
 }
 
 .comment-actions {
@@ -317,7 +392,7 @@
 }
 
 .comment-actions .comment-reply-btn {
-    color: #555;
+    color: var(--color-gray-500);
     text-decoration: none;
     font-weight: 500;
     transition: color 0.2s;
@@ -342,7 +417,7 @@
 }
 
 .more-btn:hover {
-  background-color: #f1f1f1;
+  background-color: rgba(var(--primary-rgb), 0.05);
 }
 
 .more-btn span {
@@ -351,12 +426,12 @@
 
 .more-menu {
   position: absolute;
-  background-color: #fff;
-  border: 1px solid #ddd;
+  background-color: var(--background-color-widget);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   padding: 6px 0;
   min-width: 80px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 6px rgba(var(--primary-rgb),0.1);
   display: none;
   z-index: 20;
   font-weight: normal;
@@ -366,19 +441,19 @@
 .more-menu a {
   display: block;
   padding: 6px 12px;
-  color: #333;
+  color: var(--text-color);
   text-decoration: none;
   cursor: pointer;
 }
 
 .more-menu a:hover {
-  background-color: #f5f5f5;
+  background-color: rgba(var(--primary-rgb), 0.05);
 }
 
 .more-menu button {
   display: block;
   padding: 6px 12px;
-  color: #333;
+  color: var(--text-color);
   text-decoration: none;
   cursor: pointer;
   background: none;        
@@ -389,7 +464,7 @@
   line-height: normal;    
 }
 .more-menu button:hover {
-  background-color: #f5f5f5;
+  background-color: rgba(var(--primary-rgb), 0.05);
 }
 
 .more-menu.show {
@@ -399,20 +474,20 @@
 /* 대댓글 */
 .comment-item.is-reply {
     margin-left: 40px;
-    background-color: #fdfdfd;
+    background-color: var(--background-color-widget);
     border-left: 3px solid var(--color-primary);
 }
 
 .comment-edit-reply-form {
     margin-top: 15px;
-    background-color: #fff;
-    border: 1px solid var(--border-color);
+    background-color: var(--background-color-widget);
+    /* border: 1px solid var(--color-border); */
     border-radius: 8px;
     padding: 15px;
     display: flex;
     flex-direction: column;
     gap: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 8px rgba(var(--primary-rgb), 0.05);
     animation: fadeIn 0.25s ease;
 }
 
@@ -435,7 +510,9 @@
 .comment-edit-reply-form .edit-textarea {
     flex: 1;
     min-height: 60px;
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--color-border);
+    background-color: var(--background-color-widget);
+    color: var(--text-color);
     border-radius: 6px;
     padding: 8px 10px;
     font-family: var(--basic-font), sans-serif;
@@ -480,11 +557,13 @@
 /* 취소 버튼 */
 .comment-edit-reply-form .cancel-edit-btn {
     margin-left: 8px;
-    background-color: #e9ecef;
-    color: #555;
+    background-color: var(--color-secondary);
+    /* background-color: #e9ecef; */
+    color: var(--text-special-color);
 }
 .comment-edit-reply-form .cancel-edit-btn:hover {
-    background-color: #d6d8db;
+    background-color: var(--color-secondary-hover);
+    /* background-color: #d6d8db; */
     transform: translateY(-1px);
 }
 

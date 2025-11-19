@@ -1,10 +1,11 @@
 from django import forms
-from .models import PostContents, BlogCategory, PostComments
+from .models import PostContents, BlogCategory, PostComments, BlogInfo
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
 from django.contrib.auth.password_validation import validate_password
 from django.db.models import Max
+from mptt.forms import TreeNodeChoiceField
 
 User = get_user_model()
 
@@ -68,12 +69,30 @@ class RegisterForm(UserCreationForm):
 class UserUpdateForm(forms.ModelForm):
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'email']  # 수정 가능 항목
-        widgets = {
-            'first_name': forms.TextInput(attrs={'class': 'form-control'}),
-            'last_name': forms.TextInput(attrs={'class': 'form-control'}),
-            'email': forms.EmailInput(attrs={'class': 'form-control'}),
-        }
+        fields = ['profile_image', 'nickname']  # 수정 가능 항목
+
+    def save(self, commit=True):
+        # # form.save() 호출 시 이 메서드가 실행된다. cleaned_data된 email 데이터를 여기서 추가로 넣어준다.
+        user = super().save(commit=False)
+        user.nickname = self.cleaned_data.get('nickname')
+        if commit:
+            user.save()
+        return user
+
+# 블로그 업데이트 폼
+class BlogUpdateForm(forms.ModelForm):
+    class Meta:
+        model = BlogInfo
+        fields = ['blog_title', 'blog_description']  # 수정 가능 항목
+
+    def save(self, commit=True):
+        # # form.save() 호출 시 이 메서드가 실행된다. cleaned_data된 email 데이터를 여기서 추가로 넣어준다.
+        blog = super().save(commit=False)
+        blog.blog_title = self.cleaned_data.get('blog_title')
+        blog.blog_description = self.cleaned_data.get('blog_description')
+        if commit:
+            blog.save()
+        return blog
 
 # 포스트 폼
 class PostForm(forms.ModelForm):
@@ -166,4 +185,17 @@ class CommentForm(forms.ModelForm):
                 'class': 'comment-contents-input',
                 'rows': 3
             }),
+        }
+
+class CategoryForm(forms.ModelForm):
+    class Meta:
+        model = BlogCategory
+        fields = ['category_name', 'category_isopen'] 
+        widgets = {
+            'category_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'category_isopen': forms.CheckboxInput(),
+        }
+        labels = {
+            'category_name': '카테고리 이름',
+            'category_isopen': '카테고리 펼침 여부 선택',
         }

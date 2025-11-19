@@ -30,9 +30,14 @@ urlpatterns = [
     path('login/', views.loginview, name='login'), # 로그인 페이지에 직접 들어온 경우도 로그인 여부에 따라 리다이렉트
     path('logout/', views.logoutview, name='logout'), # 로그아웃
     path('new/', views.createpost, name='createpost'), # 새로운 포스트 생성
-    path('profile/', views.updateprofile, name='updateprofile'), # 사용자/블로그 설정
+    path('settings/', views.settingspage, name='settingspage'), # 세팅 페이지
+    path('category/reorder/', views.reordercategory, name='reordercategory'), # 카테고리 정렬
+    path('category/create/', views.createcategory, name='createcategory'), # 카테고리 생성 
+    path('category/<uuid:category_id>/update/', views.updatecategory, name='updatecategory'), # 카테고리 이름 수정
+    path('category/<uuid:category_id>/delete/', views.deletecategory, name='deletecategory'), # 카테고리 삭제
     path('ckeditor5/', include('django_ckeditor_5.urls')), # ckeditor5가 로딩될 때 필요함.
-    # path("ckeditor5/upload/", views.upload_image, name="ckeditor5_upload"), todo: ckeditor 미디어 업로드 Views.py에 연결하기!
+    path('post/<int:post_id>/like/', views.togglelike, name='togglelike'), # 좋아요 처리
+    path('notifications/notificationread/', views.notificationread, name='notificationread'), # 알림 읽음 처리
     path('<slug:blog_slug>/', views.showblog, name='showblog'), # 블로그 페이지
     path('<slug:blog_slug>/category/<slug:category_slug>/', views.showblog, name='showblogbycategory'), # 카테고리 별로 포스트 보기(붙여쓰고 싶었으나 showpostdetail 파라미터 개수와 충돌하여 중간 path 추가..)
     path('<slug:blog_slug>/post/<slug:post_slug>/', views.showpostdetail, name='showpostdetail'), # 포스트 자세히 보기

@@ -1,0 +1,34 @@
+{% load static %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'css/settings/usersettings.css' %}">
+{% endblock %}
+{% block content %}
+<div class="container-update-form">
+    <h2 class="text-center">프로필 설정</h2>
+    {% comment %} action="{% url 'settingspage' %}" {% endcomment %}
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% include "main/form_errors.html" %}
+        <div class="mb-3">
+            <img src={{ form.profile_image.url|default_if_none:'' }}></img>
+            <label for="profile_image">프로필 사진</label>
+            {% if form.instance.profile_image %}
+            <img src="{{ form.instance.profile_image.url }}" alt="프로필 이미지" class="profile-preview">
+            {% endif %}
+            <input type="file" class="form-control-img" name="profile_image" id="profile_image" accept="image/*">
+            <label for="profile_image" class="custom-file-label">이미지 선택</label>
+            <span class="input-help">블로그에 사용할 프로필 사진을 업로드합니다.</span>
+        </div>
+        <div class="mb-3">
+            <label for="nickname">이름</label>
+            <input type="text" class="form-control" name="nickname" id="nickname"
+                value="{{ form.instance.nickname }}">
+                    <span class="input-help">블로그에 사용할 블로거 이름을 입력합니다.</span>
+        </div>
+        <button type="submit" class="btn btn-primary">업데이트</button>
+    </form>
+</div>
+<!-- 스크립트 -->
+<script src="{% static 'js/usersettings.js' %}"></script>
+{% endblock %}

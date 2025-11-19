@@ -1,0 +1,284 @@
+/* nestable css 뜯어서 나온 스타일 태그 */
+.dd {
+    position: relative;
+    display: block;
+    margin: 0;
+    padding: 0;
+    max-width: 600px;
+    list-style: none;
+    font-size: 13px;
+    line-height: 20px;
+}
+
+.dd-list {
+    display: block;
+    position: relative;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.dd-list .dd-list {
+    padding-left: 30px;
+}
+
+.dd-empty, .dd-item, .dd-placeholder {
+    display: block;
+    position: relative;
+    margin: 0;
+    padding: 0;
+    min-height: 20px;
+    font-size: 13px;
+    line-height: 20px;
+}
+
+.dd-handle-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 40px;
+    margin: 5px 0;
+    padding: 5px 10px;
+    box-sizing: border-box;
+    border-radius: 3px;
+    transition: background-color 0.3s, color 0.3s;
+
+    color: var(--text-color);
+    border: 1px solid var(--color-border);
+    background: var(--color-secondary); 
+}
+
+.dd-handle-wrapper:hover {
+    background: var(--background-color-widget);
+}
+
+.dd-handle {
+    display: block;
+    height: auto;
+    margin: 0;
+    padding: 0;
+    color: inherit;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 1rem;
+    border: none;
+    background: none;
+    box-sizing: border-box;
+    flex-grow: 1;
+}
+
+.dd-actions {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.dd-actions .moreBtn {
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    font-size: 1.2rem;
+    padding: 0 5px;
+}
+
+.dd-item > button {
+  display: none;
+}
+
+.dd-empty, .dd-placeholder {
+    margin: 5px 0;
+    padding: 0;
+    min-height: 30px;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    background: var(--color-secondary);
+    border: 1px dashed var(--color-gray-600);
+}
+
+.dd-empty {
+    min-height: 100px;
+    background-size: 60px 60px;
+    background-position: 0 0, 30px 30px;
+    border: 1px dashed var(--color-gray-600);
+    background-color: var(--color-gray-900);
+}
+
+.dd-dragel {
+    position: absolute;
+    pointer-events: none;
+    z-index: 9999;
+}
+
+.dd-dragel>.dd-item .dd-handle {
+    margin-top: 0;
+}
+
+.dd-dragel .dd-handle {
+    box-shadow: 2px 4px 6px 0 rgba(var(--primary-rgb), .1);
+}
+
+.dd-nochildren .dd-placeholder {
+    display: none;
+}
+
+.dd-handle-action-btn {
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.category-short-guide {
+  font-size: 0.9rem;
+  color: var(--color-gray-500);
+}
+
+.category-settings-container {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 2rem;
+  margin-top: 50px;
+}
+
+.category-tree {
+  background: var(--background-color-widget);
+  border-radius: var(--radius);
+  padding: 1rem;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.category-detail {
+  background: var(--background-color-widget);
+  border-radius: var(--radius);
+  padding: 1rem;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  display: none; 
+}
+
+.category-detail.active {
+    display: block;
+}
+
+.editBtn {
+  cursor: pointer;
+  background: none;
+  border: none;
+  color: var(--text-color);
+  padding: 2px 6px;
+  border-radius: var(--radius);
+  transition: background-color 0.2s;
+}
+
+.editBtn > span {
+  font-size: 12px;
+}
+
+.editBtn:hover {
+  background-color: var(--color-secondary-hover);
+}
+
+.CreateCategoryBtn {
+  padding: 6px 10px;
+  font-size: 0.9rem;
+  border: none;
+  border-radius: var(--button-radius);
+  background: var(--color-primary);
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.CreateCategoryBtn:hover {
+  background-color: var(--color-primary-hover);
+}
+
+.form-delete-category button {
+  font-size: 1rem;
+  padding: 6px 10px;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  border-radius: var(--button-radius);
+  background-color: var(--color-delete);
+  transition: background-color 0.2s;
+}
+
+.form-delete-category button:hover {
+  background-color: var(--color-delete-hover);
+}
+
+.form-delete-category button:disabled :hover,
+.form-delete-category button:disabled{
+    cursor: not-allowed;
+    opacity: 0.6;
+    background-color: #ccc;
+}
+
+.modal {
+  margin-top: 10px;
+}
+
+.modal-submit-btn {
+  margin-top: 10px;
+  padding: 6px 10px;
+  font-size: 0.9rem;
+  border: none;
+  border-radius: var(--button-radius);
+  background: var(--color-primary);
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.modal-submit-btn:hover {
+  background-color: var(--color-primary-hover);
+}
+
+.modal-close-btn {
+  padding: 6px 10px;
+  font-size: 0.9rem;
+  border: none;
+  border-radius: var(--button-radius);
+  background: var(--color-secondary);
+  color: var(--text-color);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.modal-close-btn:hover {
+  background-color: var(--color-secondary-hover);
+}
+
+.category-detail-subject {
+  display: flex;
+  justify-content: space-between;
+}
+
+.editcategorybutton {
+  font-size: 1rem;
+  padding: 6px 10px;
+  color: var(--text-color);
+  border: none;
+  cursor: pointer;
+  border-radius: var(--button-radius);
+  background-color: var(--color-secondary);
+  transition: background-color 0.2s;
+}
+
+.editcategorybutton:hover {
+  background-color: var(--color-secondary-hover);
+}
+
+.category-editbox-close-btn {
+  font-size: 1.2rem;
+  color: var(--text-color);
+  background: none;
+  border: none;
+  cursor: pointer;
+  height: fit-content;
+  transition: color 0.2s;
+}
+
+.category-editbox-close-btn:hover {
+  color: var(--color-primary);
+}

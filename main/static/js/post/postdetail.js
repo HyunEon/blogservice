@@ -117,4 +117,36 @@ document.addEventListener('DOMContentLoaded', () => {
             openMenu.classList.remove('show');
         });
     });
+
+    // CSRF 토큰을 가져오는 함수
+    function getCsrfTokenFromDOM() {
+        // 히든 필드로 cstf 토큰을 가져온 인풋을 찾아 토큰 값을 전달함
+        const tokenInput = document.querySelector('input[name="csrfmiddlewaretoken"]');
+        return tokenInput ? tokenInput.value : null;
+    }
+    // CSRF 토큰 변수 초기화, 이거 전역 변수임.
+    const csrftoken = getCsrfTokenFromDOM();
+
+    // 좋아요 토글 버튼
+    document.querySelectorAll('.like-btn').forEach(button => {
+        button.addEventListener('click', (e) => {
+            // 하위 span 태그가 계속 잡혀서 버튼만 잡히도록 고정
+            const button = e.currentTarget
+            let postId = ''
+            if (button.dataset.postId) {
+                postId = button.dataset.postId;
+                fetch(`/post/${postId}/like/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrftoken,
+                    }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    button.classList.toggle('liked', data.liked);
+                    button.querySelector('.like-count').innerText = data.like_count;
+                });
+            };
+        });
+    });
 });

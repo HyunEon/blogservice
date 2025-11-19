@@ -67,12 +67,11 @@ class GoogleBackend:
                 slug=f"G{now.second:02d}{(random.randint(10, 99) * (now.microsecond // 1000)):04d}"
             )
             BlogCategory.objects.create(
-                category_index=1,
                 category_name="내 글",
                 category_for=blog,
-                category_isdepth=False,
-                category_depth_for=None,
-                slug=slugify(unidecode("내 글"))
+                category_sort_order=0,
+                slug=slugify(unidecode("내 글")),
+                parent=None 
             )
             return user
 

@@ -1,0 +1,36 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block title %}
+  {% if tab == 'profile' %}
+  프로필 설정
+  {% elif tab == 'category' %}
+  카테고리 설정
+  {% else %}
+  블로그 설정
+  {% endif %}
+{% endblock %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'css/settings/settings.css' %}">
+{% endblock %}
+{% block content %}
+<div class="settings-tabs">
+  <a href="?tab=profile" class="tab1 {% if tab == 'profile' %}active{% endif %}">프로필 설정</a>
+  <a href="?tab=category" class="tab {% if tab == 'category' %}active{% endif %}">카테고리 설정</a>
+  <a href="?tab=blog" class="tab2 {% if tab == 'blog' %}active{% endif %}">블로그 설정</a>
+</div>
+
+<div id="content-profile" class="tab-content {% if tab == 'profile' %}active{% endif %}">
+  {% include 'main/settings/usersettings.html' %}
+</div>
+
+<div id="content-category" class="tab-content {% if tab == 'category' %}active{% endif %}">
+  {% include 'main/settings/categorysettings.html' %}
+</div>
+
+<div id="content-blog" class="tab-content {% if tab == 'blog' %}active{% endif %}">
+  {% include 'main/settings/blogsettings.html' %}
+</div>
+
+{% endblock %}

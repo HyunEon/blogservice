@@ -7,6 +7,7 @@
     <!-- CSS -->
     <link rel="stylesheet" href="{% static 'css/blog/post/postdetail.css' %}">
     <link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/47.1.0/ckeditor5.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <!-- JS -->
     <script src="{% static 'js/post/postdetail.js' %}"></script>
 
@@ -76,8 +77,22 @@
                 {% endif %}
             </div>
         </footer>
-
     </article>
+
+    <!-- 좋아요 섹션 -->
+    <div class="post-reactions">
+        {% if user.is_authenticated %}
+        <button class="like-btn {% if liked %}liked{% endif %}" data-post-id="{{ post.post_id }}">
+            <span class="material-symbols-outlined">favorite</span>
+            <span class="like-count">{{ post.likes.count }}</span>
+        </button>
+        {% else %}
+        <button class="like-btn" disabled onclick="alert('로그인 후 사용하실 수 있습니다!');">
+            <span class="material-symbols-outlined">favorite</span>
+            <span class="like-count">{{ post.likes.count }}</span>
+        </button>
+        {% endif %}
+    </div>
 
     <!-- 댓글 섹션 -->
     <section class="comment-section">
@@ -96,6 +111,7 @@
                         {% endif %}
                     </div>
                     {% else %}
+                    
                         <span>탈퇴한 사용자 💀</span>
                     {% endif %}
                     <!-- 본인 댓글에만 더보기 버튼 -->
@@ -146,7 +162,7 @@
                         <img src="{{ user_blog.blog_user.profile_image.url }}" alt="프로필" class="profile-img">
                         <textarea name="comment_contents" class="edit-textarea" required></textarea>
                     </div>
-                    <div class="comment-edit-reply-buttons"> 
+                    <div class="comment-edit-reply-buttons">
                         <button type="submit" class="save-edit-btn">댓글 등록</button>
                         <button type="button" class="cancel-edit-btn">취소</button>
                     </div>

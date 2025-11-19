@@ -1,10 +1,16 @@
-from .models import BlogInfo, CustomUser # BlogInfo 모델을 가져옵니다.
+from .models import BlogInfo, CustomUser, Notification # BlogInfo 모델을 가져옵니다.
 from django.conf import settings
 
 # settings에 정의한 구글 클라이언트 키를 가져옴.
 def google_client_id(request):
     return {
         'GOOGLE_CLIENT_ID': getattr(settings, 'GOOGLE_CLIENT_ID', None)
+    }
+
+# 턴 스타일 키 가져옴.
+def turnstile_keys(request):
+    return {
+        'TURNSTILE_SITE_KEY': getattr(settings, 'TURNSTILE_SITE_KEY', None)
     }
 
 def user_blog_context(request):
@@ -21,3 +27,12 @@ def user_blog_context(request):
     
     # 로그인하지 않은 사용자의 경우
     return {'user_blog': None}
+
+def notifications(request):
+    if request.user.is_authenticated:
+        return {
+            'notifications': Notification.objects.filter(
+                notification_receiver=request.user, notification_is_read=False
+            ).order_by('-notification_created_at')[:5]  # 최근 5개만
+        }
+    return {}

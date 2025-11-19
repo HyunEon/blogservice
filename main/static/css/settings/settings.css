@@ -1,0 +1,67 @@
+.settings-tabs {
+  display: block;
+  margin-left: 1rem;
+}
+
+.tab {
+  padding: 0.6rem 0.8rem;
+  border: none;
+  background: var(--background-color-widget);
+  color: var(--text-color);
+  font-weight: bold;
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+}
+
+.tab:hover {
+  background-color: var(--color-secondary-hover);
+}
+
+.tab1 {
+  padding: 0.6rem 0.8rem;
+  border: none;
+  background: var(--background-color-widget);
+  color: var(--text-color);
+  font-weight: bold;
+  text-decoration: none;
+  border-radius: var(--button-radius) 0 0 var(--button-radius);
+  transition: background-color 0.2s ease;
+}
+
+.tab1:hover {
+  background-color: var(--color-secondary-hover);
+}
+
+.tab2 {
+  padding: 0.6rem 0.8rem;
+  border: none;
+  background: var(--background-color-widget);
+  color: var(--text-color);
+  font-weight: bold;
+  text-decoration: none;
+  border-radius: 0 var(--button-radius) var(--button-radius) 0;
+  transition: background-color 0.2s ease;
+}
+
+.tab2:hover {
+  background-color: var(--color-secondary-hover);
+}
+
+.tab1.active, .tab2.active, .tab.active {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.tab1.active:hover, .tab2.active:hover, .tab.active:hover {
+  background: var(--color-primary-hover);
+  color: #fff;
+}
+
+.tab-content {
+  display: none;
+  margin-top: 20px;
+}
+
+.tab-content.active {
+  display: block;
+}

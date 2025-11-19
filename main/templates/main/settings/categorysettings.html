@@ -1,0 +1,73 @@
+{% load mptt_tags %}
+{% load static %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/settings/categorysettings.css' %}">
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/nestable2/1.6.0/jquery.nestable.min.js"></script>
+{% endblock %}
+{% block content %}
+
+{% if categories %}
+{% csrf_token %}
+<div class="category-settings-container">
+  <div class="category-tree">
+    <button id="CreateCategoryBtn" class="CreateCategoryBtn">＋ 새 카테고리</button>
+    <!-- 모달 -->
+    <div id="categoryModal" class="modal" style="display:none;">
+    <form id="categoryForm" class="CreateCategoryModal"method="POST" action="{% url 'createcategory' %}">
+        {% csrf_token %}
+        {% include "main/form_errors.html" %}
+        {{ form.category_name.label_tag }}
+        {{ form.category_name }}
+        <button type="submit" class="modal-submit-btn">저장</button>
+        <button type="button" id="modalClose" class="modal-close-btn">취소</button>
+    </form>
+    </div>
+    <p class="category-short-guide">👉 카테고리는 드래그하여 순서를 변경하고, 오른쪽으로 이동해 하위 카테고리로 만들 수 있습니다.</p>
+    <div class="dd" id="category-nestable" data-reorder-url="{% url 'reordercategory' %}">
+    <ol class="dd-list">
+        {% recursetree categories %}
+            <li class="dd-item" data-id="{{ node.category_id }}">
+                <div class="dd-handle-wrapper">
+                    <div class="dd-handle">{{ node.category_name }}</div>
+                    <div class="dd-actions">
+                            <button class="moreBtn" data-id="{{ node.category_id }}">⋮</button>
+                        </div>
+                    </div>
+                {% if not node.is_leaf_node %}
+                    <ol class="dd-list">
+                        {{ children }}
+                    </ol>
+                {% endif %}
+            </li>
+        {% endrecursetree %}
+    </ol>
+</div>
+</div>
+ <div class="category-detail" id="category-detail">
+    <div class="category-detail-subject">
+        <h3>카테고리 정보</h3>
+        <button id="categoryEditBoxClostButton" class="category-editbox-close-btn">✕</button>
+    </div>
+    <div id="categoryEditBox">
+        {% csrf_token %}
+        <label>이름</label>
+        <input type="text" name="name" id="categoryNameInput" class="form-control" placeholder="선택된 카테고리 없음" disabled>
+        <div class="dd-handle-action-btn">
+            <button id="saveCategoryBtn" class="editcategorybutton">저장</button>
+            <form id="deleteCategoryForm" class="form-delete-category" method="POST">
+                {% csrf_token %}
+                <button type="submit" id="deleteCategoryBtn">삭제</button>
+            </form>
+        </div>
+    </div>
+  </div>
+{% endif %}
+{% endblock %}
+
+{% block extra_scripts %}
+<!-- 스크립트 -->
+<script src="{% static 'js/categorysettings.js' %}"></script>
+{% endblock %}

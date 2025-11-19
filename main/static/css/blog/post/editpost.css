@@ -1,5 +1,195 @@
 /* editpost.css */
 
+:root {
+    --ck-custom-foreground: hsl(0, 0%, 100%);
+    --ck-custom-border: hsl(0, 0%, 85%);
+    --ck-custom-white: hsl(0, 0%, 0%);
+
+    /* Generic colors */
+    --ck-content-font-color: hsl(0, 0%, 10%);
+
+    --ck-color-base-background: hsl(0, 0%, 100%);
+    --ck-color-base-border: hsl(0, 0%, 80%);
+
+    --ck-color-focus-border: hsl(212, 100%, 45%);
+    --ck-color-text: hsl(0, 0%, 10%);
+    --ck-color-shadow-drop: hsla(0, 0%, 0%, 0.1);
+    --ck-color-shadow-inner: hsla(0, 0%, 0%, 0.05);
+
+    /* Buttons */
+    --ck-color-button-default-hover-background: hsl(0, 0%, 96%);
+    --ck-color-button-default-active-background: hsl(0, 0%, 93%);
+    --ck-color-button-default-active-shadow: hsl(0, 0%, 90%);
+
+    --ck-color-button-on-background: hsl(0, 0%, 95%);
+    --ck-color-button-on-hover-background: hsl(0, 0%, 90%);
+    --ck-color-button-on-active-background: hsl(0, 0%, 88%);
+    --ck-color-button-on-active-shadow: hsl(0, 0%, 85%);
+    --ck-color-button-on-disabled-background: hsl(0, 0%, 97%);
+
+    --ck-color-button-action-background: hsl(212, 100%, 50%);
+    --ck-color-button-action-hover-background: hsl(212, 100%, 45%);
+    --ck-color-button-action-active-background: hsl(212, 100%, 42%);
+    --ck-color-button-action-active-shadow: hsl(212, 100%, 40%);
+    --ck-color-button-action-disabled-background: hsl(212, 80%, 65%);
+    --ck-color-button-action-text: hsl(0, 0%, 100%);
+
+    --ck-color-button-save: hsl(120, 70%, 40%);
+    --ck-color-button-cancel: hsl(10, 80%, 50%);
+
+    /* Dropdown */
+    --ck-color-dropdown-panel-border: hsl(0, 0%, 85%);
+
+    /* Dialog */
+    --ck-color-dialog-form-header-border: hsl(0, 0%, 85%);
+
+    /* Splitbutton */
+    --ck-color-split-button-hover-background: hsl(0, 0%, 95%);
+    --ck-color-split-button-hover-border: hsl(0, 0%, 80%);
+
+    /* Inputs */
+    --ck-color-input-border: hsl(0, 0%, 80%);
+    --ck-color-input-text: hsl(0, 0%, 10%);
+    --ck-color-input-disabled-background: hsl(0, 0%, 96%);
+    --ck-color-input-disabled-border: hsl(0, 0%, 88%);
+    --ck-color-input-disabled-text: hsl(0, 0%, 60%);
+
+    /* List */
+    --ck-color-list-button-hover-background: hsl(0, 0%, 95%);
+    --ck-color-list-button-on-background: hsl(208, 88%, 52%);
+    --ck-color-list-button-on-text: hsl(0, 0%, 100%);
+
+    /* Panel */
+    --ck-color-panel-border: hsl(0, 0%, 85%);
+
+    /* Toolbar */
+    --ck-color-toolbar-border: hsl(0, 0%, 85%);
+
+    /* Tooltip */
+    --ck-color-tooltip-background: hsl(0, 0%, 15%);
+    --ck-color-tooltip-text: hsl(0, 0%, 100%);
+
+    /* Image captions */
+    --ck-content-color-image-caption-background: hsl(0, 0%, 97%);
+    --ck-content-color-image-caption-text: hsl(0, 0%, 20%);
+
+    /* Widget */
+    --ck-color-widget-blurred-border: hsl(0, 0%, 87%);
+    --ck-color-widget-hover-border: hsl(43, 100%, 55%);
+    --ck-color-widget-editable-focus-background: hsl(0, 0%, 100%);
+
+    /* Links */
+    --ck-color-link-default: hsl(212, 100%, 45%);
+}
+
+[data-theme="dark"] {
+      /* Helper variables to avoid duplication in the colors. */
+
+    --ck-custom-foreground: hsl(255, 3%, 18%);
+    --ck-custom-border: hsl(300, 1%, 22%);
+    --ck-custom-white: hsl(0, 0%, 100%);
+
+    /* -- Overrides generic colors. ------------------------------------------------------------- */
+
+    --ck-content-font-color: var(--ck-custom-white);
+
+    --ck-color-base-background: hsl(270, 1%, 29%);
+    --ck-color-base-border: hsl(240, 4%, 24%);
+
+    --ck-color-focus-border: hsl(208, 90%, 62%);
+    --ck-color-text: hsl(0, 0%, 98%);
+    --ck-color-shadow-drop: hsla(0, 0%, 0%, 0.2);
+    --ck-color-shadow-inner: hsla(0, 0%, 0%, 0.1);
+
+    /* -- Overrides the default .ck-button class colors. ---------------------------------------- */
+
+    --ck-color-button-default-hover-background: hsl(270, 1%, 22%);
+    --ck-color-button-default-active-background: hsl(270, 2%, 20%);
+    --ck-color-button-default-active-shadow: hsl(270, 2%, 23%);
+
+    --ck-color-button-on-background: var(--ck-custom-foreground);
+    --ck-color-button-on-hover-background: hsl(255, 4%, 16%);
+    --ck-color-button-on-active-background: hsl(255, 4%, 14%);
+    --ck-color-button-on-active-shadow: hsl(240, 3%, 19%);
+    --ck-color-button-on-disabled-background: var(--ck-custom-foreground);
+
+    --ck-color-button-action-background: hsl(168, 76%, 42%);
+    --ck-color-button-action-hover-background: hsl(168, 76%, 38%);
+    --ck-color-button-action-active-background: hsl(168, 76%, 36%);
+    --ck-color-button-action-active-shadow: hsl(168, 75%, 34%);
+    --ck-color-button-action-disabled-background: hsl(168, 76%, 42%);
+    --ck-color-button-action-text: var(--ck-custom-white);
+
+    --ck-color-button-save: hsl(120, 100%, 46%);
+    --ck-color-button-cancel: hsl(15, 100%, 56%);
+
+    /* -- Overrides the default .ck-dropdown class colors. -------------------------------------- */
+
+    --ck-color-dropdown-panel-border: var(--ck-custom-foreground);
+
+    /* -- Overrides the default .ck-dialog class colors. ----------------------------------- */
+
+    --ck-color-dialog-form-header-border: var(--ck-custom-border);
+
+    /* -- Overrides the default .ck-splitbutton class colors. ----------------------------------- */
+
+    --ck-color-split-button-hover-background: var(--ck-color-button-default-hover-background);
+    --ck-color-split-button-hover-border: var(--ck-custom-foreground);
+
+    /* -- Overrides the default .ck-input class colors. ----------------------------------------- */
+
+    --ck-color-input-border: hsl(257, 3%, 43%);
+    --ck-color-input-text: hsl(0, 0%, 98%);
+    --ck-color-input-disabled-background: hsl(255, 4%, 21%);
+    --ck-color-input-disabled-border: hsl(250, 3%, 38%);
+    --ck-color-input-disabled-text: hsl(0, 0%, 78%);
+
+    /* -- Overrides the default .ck-list class colors. ------------------------------------------ */
+
+    --ck-color-list-button-hover-background: var(--ck-custom-foreground);
+    --ck-color-list-button-on-background: hsl(208, 88%, 52%);
+    --ck-color-list-button-on-text: var(--ck-custom-white);
+
+    /* -- Overrides the default .ck-balloon-panel class colors. --------------------------------- */
+
+    --ck-color-panel-border: var(--ck-custom-border);
+
+    /* -- Overrides the default .ck-toolbar class colors. --------------------------------------- */
+
+    --ck-color-toolbar-border: var(--ck-custom-border);
+
+    /* -- Overrides the default .ck-tooltip class colors. --------------------------------------- */
+
+    --ck-color-tooltip-background: hsl(252, 7%, 14%);
+    --ck-color-tooltip-text: hsl(0, 0%, 93%);
+
+    /* -- Overrides the default colors used by the ckeditor5-image package. --------------------- */
+
+    --ck-content-color-image-caption-background: hsl(0, 0%, 97%);
+    --ck-content-color-image-caption-text: hsl(0, 0%, 20%);
+
+    /* -- Overrides the default colors used by the ckeditor5-widget package. -------------------- */
+
+    --ck-color-widget-blurred-border: hsl(0, 0%, 87%);
+    --ck-color-widget-hover-border: hsl(43, 100%, 68%);
+    --ck-color-widget-editable-focus-background: var(--ck-custom-white);
+
+    /* -- Overrides the default colors used by the ckeditor5-link package. ---------------------- */
+
+    --ck-color-link-default: hsl(190, 100%, 75%);
+}
+
+/* Improve displaying links. */
+.ck.ck-editor__editable a {
+    color: hsl(210, 100%, 63%);
+}
+
+/* Improve displaying code blocks. */
+.ck-content pre {
+    color: hsl(0, 0%, 91%);
+    border-color: hsl(0, 0%, 77%);
+}
+
 .editpost-container {
   display: flex;
   justify-content: center;
@@ -10,16 +200,16 @@
 .editform-card {
   width: 100%;
   max-width: var(--max-width-desktop);
-  background-color: #fff;
+  background-color: var(--background-color-widget);
   border-radius: var(--radius);
   padding: 1.5rem;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 16px rgba(var(--primary-rgb),0.08);
   animation: slideUp 0.4s ease; /* 슬라이드 업 하면서 나타남 */
   transition: box-shadow 0.3s ease; /* hover 하면 박스 쉐도우가 살짝 진해짐 ㅎ */
 }
 
 .editform-card:hover {
-  box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+  box-shadow: 0 6px 20px rgba(var(--primary-rgb),0.12);
 }
 
 /* 카테고리 + 제목 영역 */
@@ -27,19 +217,22 @@
   display: flex;
   gap: 10px;
   margin-bottom: 20px;
+  flex-direction: column;
 }
 
 .post-category-selector {
   width: 20%;
   font-size: 1rem;
   border-radius: 8px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--color-border);
   padding: 6px 10px;
   transition: all 0.25s ease;
+  background-color: var(--background-color-widget);
+  color: var(--text-color);
 }
 
 .post-category-selector:hover {
-  border-color: #5aabee;
+  border-color: var(--color-primary);
   box-shadow: 0 0 4px rgba(90,171,238,0.3);
 }
 
@@ -47,14 +240,16 @@
   flex: 1;
   padding: 8px 12px;
   border-radius: 8px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--color-border);
   font-size: 1rem;
   transition: all 0.25s ease;
+  background-color: var(--background-color-widget);
+  color: var(--text-color);
 }
 
 .post-title-input:focus {
   outline: none;
-  border-color: #5aabee;
+  border-color: var(--color-primary);
   box-shadow: 0 0 6px rgba(90,171,238,0.4);
 }
 
@@ -72,11 +267,11 @@
     user-select: none;
     border-radius: 6px;
     transition: all 0.15s ease;
-    border: 1px solid #ccc;
+    border: 1px solid var(--color-border);
 }
 
 .align-icon-label:hover {
-    background-color: #e2e6ea;
+    background-color: rgba(var(--primary-rgb), 0.055);
     transform: translateY(-1px);
     box-shadow: 0 2px 6px rgba(0,0,0,0.15);
 }
@@ -103,10 +298,9 @@
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
 }
 
-
 .editor-label {
   font-size: 18px;
-  color: #555;
+  color: var(--text-color);
   margin-bottom: 8px;
   display: block;
   text-align: left;
@@ -139,18 +333,19 @@ button {
 .btn-primary:hover {
   background: var(--color-primary-hover);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(74,144,226,0.3);
+  box-shadow: 0 4px 12px rgba(var(--primary-rgb) ,0.03);
 }
 
 /* secondary 버튼 */
 .btn-secondary {
   background-color: var(--color-secondary);
-  color: #333;
+  color: var(--text-color);
 }
 
 .btn-secondary:hover {
   background-color: var(--color-secondary-hover);
   transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.03);
 }
 
 /* 애니메이션 */
@@ -162,4 +357,26 @@ button {
 @keyframes slideUp {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* 태블릿 */
+@media (min-width: 768px) {
+  .editpost-container {
+    width: var(--max-width-tablet);
+  }
+
+  .subject-category-area {
+    flex-direction: row;
+  }
+}
+
+/* 데스크탑 */
+@media (min-width: 992px) {
+  .editpost-container  {
+    width: var(--max-width-desktop);
+  }
+
+  .subject-category-area {
+    flex-direction: row;
+  }
 }

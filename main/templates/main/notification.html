@@ -1,0 +1,20 @@
+{% load static %}
+
+<div id="notification-content">
+    <div class="label-notif-container">
+        <label>알림</label>
+    </div>
+    {% csrf_token %}
+    {% for notif in notifications %}
+        <div class="notif-item">
+            <a href="{{ notif.notification_url }}" class="notif-link">{{ notif.notification_message }}</a>
+            <button class="notif-itme-close-btn" data-notif-id="{{ notif.id }}">×</button>
+            <small>{{ notif.notification_created_at|date:"H:i" }}</small>
+        </div>
+    {% empty %}
+        <div class="notif-item-none">새로운 알림이 없습니다.</div>
+    {% endfor %}
+    <button class="notif-all-read-btn">모두 읽음</button>
+</div>
+<!-- 스크립트 -->
+<script src="{% static 'js/notification.js' %}"></script>

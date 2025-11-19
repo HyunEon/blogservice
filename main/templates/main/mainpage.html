@@ -1,9 +1,10 @@
-<!-- TODO: 블로그 전체를 보여줄 수 있도록 UI 추가 -->
 {% extends 'main/base.html' %}
 {% load static %}
+{% load custom_filters %}
 
 {% block extra_head %}
     <link rel="stylesheet" href="{% static 'css/mainpage.css' %}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 {% endblock %}
 
 {% block title %}메인 페이지{% endblock %}
@@ -23,12 +24,49 @@
                 {{ blog.blog_title }}
             </a>
             <div class="blog-meta">
-                ✍️ 블로거: {{ blog.blog_user.nickname }} <br>
+                <a href="{% url 'showblog' blog_slug=blog.slug %}"> 
+                    {{ blog.blog_user.blog_description }}
+                </a>
+                <a href="{% url 'showblog' blog_slug=blog.slug %}"> 
+                    <img class = "blog-meta-editor-image" src="{{ blog.blog_user.profile_image.url }}" alt="{{ blog.blog_user.nickname }}"> 
+                    {{ blog.blog_user.nickname }}
+                </a>
             </div>
         </li>
         {% endfor %}
     </ul>
-
+    <section class="recent-posts">
+        <h2>📰 최근 게시글들도 살펴보세요!</h2>
+        <div class="post-grid">
+            {% for post in postlist %}
+            <article class="post-card">
+                <a href="{% url 'showpostdetail' blog_slug=post.post_blog.slug post_slug=post.slug %}">
+                   {% if post.post_thumbnail %}
+                        <img class="post-thumbnail-img" src="{{ post.post_thumbnail.url }}" alt="{{ post.post_title }}">
+                    {% else %}
+                        <div class="thumbnail-placeholder"></div>
+                    {% endif %}
+                <h3>{{ post.post_title }}</h3>
+                <div class="post-excerpt">
+                    {{ post.post_contents|urldecode|striptags|safe|truncatewords:50 }}
+                </div>
+                <div class="post-meta">
+                     <img class = "post-meta-editor-image" src="{{ post.post_blog.blog_user.profile_image.url }}" alt="{{ post.post_blog.blog_user.nickname }}">
+                    <p>{{ post.post_blog.blog_user.nickname }}</p>
+                    <span class="material-symbols-outlined">schedule</span>
+                    <p>{{ post.post_date|timeago }}</p>
+                    <div class="post-popularity">
+                        <span class="material-symbols-outlined">visibility</span>
+                        <p>{{ post.post_view_count }}</p>
+                        <span class="material-symbols-outlined">favorite</span>
+                        <p>{{ post.likes.count }}</p>
+                    </div>
+                </div>
+                </a>
+            </article>
+            {% endfor %}
+        </div>
+    </section>
 </div>
 <script src="{% static 'js/mainpage.js' %}"></script>
 {% endblock %} 

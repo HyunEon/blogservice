@@ -37,7 +37,7 @@ def get_secret(setting, secrets=secrets):
 SECRET_KEY = get_secret("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
@@ -50,6 +50,12 @@ LOGIN_URL = '/login/'
 
 # 로그인 성공후 이동하는 URL
 # LOGIN_REDIRECT_URL = ''
+
+# 세션 엔진 지정
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+
+# 세션 저장에 사용할 캐시 별칭을 지정 
+SESSION_CACHE_ALIAS = "default"
 
 # 세션 만료 시간 - 현재 10분
 SESSION_EXPIRE_SECONDS = 600
@@ -77,6 +83,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django_ckeditor_5',
     'main', 
+    'mptt',
 ]
 
 MIDDLEWARE = [
@@ -88,6 +95,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'blog_project.urls'
@@ -105,6 +113,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'main.context_processors.user_blog_context',
                 'main.context_processors.google_client_id',
+                'main.context_processors.notifications',
             ],
         },
     },
@@ -124,6 +133,7 @@ except KeyError as e:
 AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID', MINIO_USER)
 AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY', MINIO_PW)
 AWS_STORAGE_BUCKET_NAME = BUCKET_NAME
+
 # 나중에 django가 사용할 읽기/쓰기만 가진 계정을 추가해서 적용하는게 보안적으로 더 좋을 것 같다.. (postgresql도 마찬가지)
 AWS_S3_ENDPOINT_URL = 'http://127.0.0.1:9002' # 파일 업로드/관리용
 
@@ -133,7 +143,7 @@ AWS_S3_CUSTOM_DOMAIN = MINIO_URL
 AWS_S3_OBJECT_PARAMETERS = {
     'CacheControl': 'max-age=86400', # 캐시 설정 (선택 사항)
 }
-AWS_S3_USE_SSL = True  # [중요] 로컬 MinIO는 http이므로 False로 설정
+AWS_S3_USE_SSL = True # HTTPS 선택 여부
 AWS_S3_SIGNATURE_VERSION = 's3v4' # S3 서명 버전
 AWS_QUERYSTRING_AUTH = False  # Signed URL 사용 안함 (개발용)
 
@@ -149,6 +159,29 @@ STORAGES = {
         "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
     },
 }
+
+CACHES = {
+    "default": {
+        # django-redis의 백엔드 지정
+        "BACKEND": "django_redis.cache.RedisCache",
+        
+        # Redis 연결 URL (실제 환경에 맞게 수정 필요)
+        "LOCATION": "redis://127.0.0.1:6379/1", 
+        # 마지막 숫자는 DB 인덱스를 의미합니다. 0은 기본 인덱스입니다.
+
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            # 캐시 값이 만료되지 않을 경우의 기본 타임아웃 (초 단위)
+            "TIMEOUT": 300, 
+        }
+    }
+}
+
+# 셀러리 정의
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Asia/Seoul'
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
@@ -205,6 +238,11 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',  # 기본 인증
 ]
 
+# 클라우드플레어 턴 스타일 사이트 키
+TURNSTILE_SITE_KEY = get_secret("TURNSTILE_SITE_KEY")
+# 턴 사이트 시크릿 키
+TURNSTILE_SECRET_KEY = get_secret("TURNSTILE_SECRET_KEY")
+
 # Google 클라이언트 키
 GOOGLE_CLIENT_ID = get_secret("GOOGLE_CLIENT_ID")
 
@@ -224,9 +262,9 @@ USE_TZ = False
 
 STATIC_URL = '/static/'
 
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static"),
-]
+STATICFILES_DIRS = [BASE_DIR / 'static']
+
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -240,16 +278,17 @@ CKEDITOR_5_UPLOAD_PATH = "uploads/"
 CKEDITOR_5_CUSTOM_CSS = '/static/css/blog/post/ckeditor5.css'
 
 # ckeditor 미디어 경로 설정
-CKEDITOR_5_UPLOAD_PATH = {
-    # 이미지
-    "image": "images/", 
+CKEDITOR_5_UPLOAD_PATH = ""
+# CKEDITOR_5_UPLOAD_PATH = {
+#     # 이미지
+#     "image": "images/", 
     
-    # 일반 파일
-    "file": "files/",
+#     # 일반 파일
+#     "file": "files/",
     
-    # 만약 대비하여 기본 경로 설정
-    "default": "ckeditor-others/"
-}
+#     # 만약 대비하여 기본 경로 설정
+#     "default": "ckeditor-others/"
+# }
 
 CKEDITOR_5_MAX_FILE_SIZE = 5
 
@@ -319,7 +358,7 @@ CKEDITOR_5_CONFIGS = {
         'placeholder': '글을 작성해보세요!',
         'alignment': {
             'options': ['left', 'center', 'right', 'justify']  # 왼쪽, 가운데, 오른쪽, 양쪽
-        },
+        }, 
         'image': {
             'toolbar': ['imageTextAlternative', '|', 'imageStyle:alignLeft', 'imageStyle:alignCenter', 'imageStyle:alignRight', 'imageStyle:side',  '|'],
             'styles': [
@@ -329,7 +368,7 @@ CKEDITOR_5_CONFIGS = {
                 'alignRight',
                 'alignCenter',
             ]
-        },
+        }, 
         'table': {
             'contentToolbar': [ 'tableColumn', 'tableRow', 'mergeTableCells',
             'tableProperties', 'tableCellProperties' ],

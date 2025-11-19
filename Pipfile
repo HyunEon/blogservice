@@ -5,7 +5,6 @@ name = "pypi"
 
 [packages]
 django-session-timeout = "*"
-gunicorn = "*"
 pillow = "*"
 django-ckeditor-5 = "*"
 unidecode = "*"
@@ -17,10 +16,18 @@ jwt = "*"
 google-auth = "*"
 requests = "*"
 django-storages = "*"
-boto3 = "*"
+whitenoise = "*"
+minio = "*"
 fastapi = "*"
 uvicorn = "*"
 python-multipart = "*"
+boto3 = "*"
+beautifulsoup4 = "*"
+celery = "*"
+redis = "*"
+django-mptt = "*"
+django-redis = "*"
+gunicorn = "*"
 
 [dev-packages]
 

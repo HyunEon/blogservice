@@ -3,11 +3,27 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+    <!-- FOUC 현상 해결을 위해 인라인 스크립트 적용, DOM이 생성되기 전 해당 스크립트를 읽어 먼저 로컬 스토리지에서 테마 값을 가져옴 -->
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem("data-theme");
+            const html = document.documentElement;
+
+            if (savedTheme) {
+                html.setAttribute("data-theme", savedTheme);
+            } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                html.setAttribute("data-theme", "dark");
+            } else {
+                html.setAttribute("data-theme", "light");
+            }
+        })();
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- GSL cross-origin 설정-->
     <meta name="referrer" content="strict-origin-when-cross-origin" />
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/notification.css' %}">
     <!-- https://fonts.google.com/icons?selected=Material+Icons:format_align_right:&icon.query=alignment&icon.size=16&icon.color=%231f1f1f&icon.style=Outlined -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="icon" type="image/png" sizes="32x32" href="{% static 'favicon/favicon-32x32.png' %}">
@@ -15,8 +31,8 @@
     {% block extra_head %}
     {% endblock %}
     <title>{% block title %}블로그{% endblock %}</title>
-</head>
-<body>
+    </head>
+    <body>
     <!-- 헤더 -->
     <header class="main-header">
         <div class="header-container">
@@ -27,8 +43,35 @@
             <a href="{% url 'showmain' %}"class="blog-title-link">블로그</a>
             {% endif %}
             <ul class="nav-menu">
+                <!-- theme 전환 버튼 레퍼런스: https://sirius7.tistory.com/143 -->
+                <button class="theme-toggle-button" id="theme-toggle">
+                    <div class="icon30 sun"> 
+                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#222222">
+                            <path d="M480-280q-83 0-141.5-58.5T280-480q0-83 58.5-141.5T480-680q83 0 141.5 58.5T680-480q0 83-58.5 141.5T480-280ZM200-440H40v-80h160v80Zm720 0H760v-80h160v80ZM440-760v-160h80v160h-80Zm0 720v-160h80v160h-80ZM256-650l-101-97 57-59 96 100-52 56Zm492 496-97-101 53-55 101 97-57 59Zm-98-550 97-101 59 57-100 96-56-52ZM154-212l101-97 55 53-97 101-59-57Z"/>
+                        </svg>
+                    </div>
+                    <div class="icon30 moon">      
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#FFFFFF">
+                        <path d="M480-120q-150 0-255-105T120-480q0-150 105-255t255-105q14 0 27.5 1t26.5 3q-41 29-65.5 75.5T444-660q0 90 63 153t153 63q55 0 101-24.5t75-65.5q2 13 3 26.5t1 27.5q0 150-105 255T480-120Z"/>
+                    </svg>
+                    </div>
+                </button>
                 <!-- 로그인 시 프로필 활성화, 아니면 로그인 링크-->
-                {% if user.is_authenticated %}
+                    {% if user.is_authenticated %}
+                    <div class="notif-container">
+                        <button id="notif-btn" class="notif-btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="var(--text-special-color)">
+                                <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
+                            </svg>
+                        {% if notifications %}
+                            <span class="notif-dot"></span>
+                        {% endif %}
+                    </button>
+                    <!-- 알림 팝업 -->
+                    <div id="notif-popup" class="notif-popup">
+                    {% include 'main/notification.html' %}
+                    </div>
+                </div>
                 <div class="profile-menu">
                     <button class="profile-button">
                         <img src={{ user_blog.blog_user.profile_image.url }} alt="프로필" class="profile-img">
@@ -36,7 +79,8 @@
                     </button>
                     <ul class="dropdown-menu">
                         <li><a href="{% url 'showmain' %}">메인</a></li>
-                        <li><a href="{% url 'updateprofile' %}">설정</a></li>
+                        <li><a href="{% url 'showblog' blog_slug=user_blog.slug %}">내 블로그</a></li>
+                        <li><a href="{% url 'settingspage' %}">설정</a></li>
                         <li><a href="{% url 'logout' %}">로그아웃</a></li>
                         {% else %}
                             <a class="nav-login" href="{% url 'login' %}?next={{ request.get_full_path }}">로그인</a>
@@ -57,17 +101,18 @@
     {% endif %}
 
     <!-- 본문 콘텐츠 영역 -->
-    <main class="main-content">
-        {% block content %}
-        {% endblock %}
-    </main>
+    <div class="page-wrapper">
+        <main class="main-content">
+            {% block content %}
+            {% endblock %}
+        </main>
     
     <!-- 푸터 -->
     <footer class="main-footer">
         <div class="footer-container">
-            </div>
+            <p>© 2025 Hyuneon Blog. All rights reserved. Powered by Django.</p>
+        </div>
     </footer>
-
     <!-- 스크립트 -->
     <script src="{% static 'js/base.js' %}"></script>
 </body>

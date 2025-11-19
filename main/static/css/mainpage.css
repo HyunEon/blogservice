@@ -15,7 +15,7 @@
 .mainpage-header-new-blogs h2 {
    font-size: 1.8rem;
    font-weight: bold;
-   color: #333;
+   color: var(--text-color);
    animation: reveal 1s cubic-bezier(0.77, 0, 0.175, 1) forwards;
 }
 
@@ -33,27 +33,27 @@
    padding: 2rem;
    font-size: 1.4rem;
    border-radius: var(--radius);
-   color: #777;
+   color: var(--text-color);
    animation: bounce 1s infinite;
 }
 
 .blog-card {
-   background: #fff;
+   background: var(--background-color-widget);;
    border-radius: 12px;
    padding: 1.2rem;
-   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+   box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.08);
    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .blog-card:hover {
    transform: translateY(-5px);
-   box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+   box-shadow: 0 6px 16px rgba(var(--primary-rgb),0.12);
 }
 
 .blog-title {
    font-size: 1.2rem;
    font-weight: 600;
-   color: #2c3e50;
+   color: var(--text-color);
    margin-bottom: 0.5rem;
    text-decoration: none;
    display: block;
@@ -65,7 +65,106 @@
 
 .blog-meta {
    font-size: 0.9rem;
-   color: #888;
+   color: var(--color-gray-500);
+}
+
+.blog-meta a {
+   display: flex;
+   vertical-align: middle;
+   align-items: center;
+   gap: 5px;
+   text-decoration: none;
+   color: var(--color-gray-500);
+}
+
+.blog-meta-editor-image {
+   border-radius: 50%;
+   width: 24px;
+   height: 24px;
+}
+
+.recent-posts { margin-top: 50px; }
+.post-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.post-card {
+  background: var(--background-color-widget);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(var(--primary-rgb), 0.1);
+  transition: transform .2s;
+}
+
+.post-card a {
+   color: var(--text-color);
+   text-decoration: none;
+}
+
+.post-card:hover { transform: translateY(-4px); }
+
+.post-card h3 {
+   padding: 0 1.2rem 0 1.2rem;
+}
+
+.post-thumbnail-img {
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+  display: block;
+  mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+}
+
+.material-symbols-outlined {
+  font-size: 18px;
+  vertical-align: middle;
+}
+
+span.material-symbols-outlined {
+  font-size: 16px;
+}
+
+.post-excerpt {
+   padding: 0 1.2rem 0 1.2rem;
+  color: var(--text-color);
+  font-size: 0.9rem;
+}
+
+.post-meta {
+   display: flex;
+   align-items: center;
+   gap:0.2rem;
+   padding: 0 1.2rem 0 0.9rem;
+   font-size: 0.9rem;
+   color: var(--color-gray-500);
+}
+
+.post-meta-editor-image {
+   border-radius: 50%;
+   width: 16px;
+   height: 16px;
+}
+
+.post-popularity {
+   display: flex;
+   align-items: center;
+   gap:0.2rem;
+   color: var(--color-gray-500);
+   margin-left: auto;
+}
+
+/* 썸네일 없으면 단색 무늬만 나오게 */
+.thumbnail-placeholder {
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+  display: block;
+  mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+  background-color: var(--background-color);
 }
 
 /* 슬라이드 업 애니메이션 

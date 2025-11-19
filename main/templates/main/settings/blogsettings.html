@@ -1,0 +1,28 @@
+{% load static %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'css/settings/blogsettings.css' %}">
+{% endblock %}
+{% block content %}
+<div class="container-update-form">
+    <h2 class="text-center">블로그 설정</h2>
+    {% comment %} action="{% url 'settingspage' %}" {% endcomment %}
+    <form method="post"> 
+        {% csrf_token %}
+        {% include "main/form_errors.html" %}
+        <div class="mb-3">
+            <label for="blog_title">블로그 제목</label>
+            <input type="text" class="form-control" name="blog_title" id="blog_title"
+                value="{{ form.instance.blog_title }}">
+                    <span class="input-help">블로그 제목을 입력합니다.</span>
+        </div>
+        <div class="mb-3">
+            <label for="blog_description">블로그 설명</label>
+            <input type="text" class="form-control" name="blog_description" id="blog_description"
+                value="{{ form.instance.blog_description }}">
+                    <span class="input-help">블로그 설명을 입력합니다.</span>
+        </div>
+        <button type="submit" class="btn btn-primary">업데이트</button>
+    </form>
+</div>
+{% endblock %}

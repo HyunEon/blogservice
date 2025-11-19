@@ -1,33 +1,59 @@
 {% extends 'main/base.html' %}
 {% load static %}
+{% load mptt_tags %}
+{% load custom_filters %}
 
 {% block title %}{{ blog.blog_title }}{% endblock %}
 
 {% block extra_head %}
     <link rel="stylesheet" href="{% static 'css/blog/blogpage.css' %}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 {% endblock %}
 
 {% block content %}
 <div class="container blog-container">
     <aside class="blog-sidebar">
-        <h2>카테고리</h2>
-        <nav class="category-nav">
-            <ul>
-                <li>
-                    <a href="{% url 'showblog' blog_slug=blog.slug %}" class="category-item">전체글 보기</a>
-                </li>
-                {% for categories in categories %}
-                <li>
-                    <a href="{% url 'showblogbycategory' blog_slug=blog.slug category_slug=categories.slug %}" 
-                       class="category-item {% if categories.category_isdepth %}category-item-depth{% endif %}">
-                        {{ categories.category_name }}
-                    </a>
-                </li>
-                {% endfor %}
-            </ul>
-        </nav>
-    </aside>
+        <div class="sidebar-profile">
+            <img src="{{ blog.blog_user.profile_image.url }}" alt="프로필" class="sidebar-profile-img">
+            <h3>{{ blog.blog_user.nickname }}</h3>
+        <p>{{ blog.blog_description }}</p>
+    </div>
 
+    <div class="sidebar-category">
+    <h2>카테고리</h2>
+    <nav class="category-nav">
+        <ul>
+            <li>
+                <a href="{% url 'showblog' blog_slug=blog.slug %}" class="category-item">전체글 보기 <span>({{ totalposts }})</span></a>
+            </li>
+            {% recursetree categories %}
+            <li class="category-node">
+                <div class="category-header" style="margin-left: {{ node.level|add:"0" }}em;">
+                    <a href="{% url 'showblogbycategory' blog_slug=blog.slug category_slug=node.slug %}"
+                    class="{% if category_slug == node.slug %}category-item-active{% else %}category-item{% endif %}">
+                        {{ node.category_name }}
+                    </a>
+                    {% if not node.is_leaf_node %}
+                        <span class="category-toggle" data-target="#children-{{ node.category_id }}">
+                            <span class="material-symbols-outlined">
+                            arrow_drop_down
+                            </span>
+                        </span>
+                    {% endif %}
+                </div>
+                
+                {% if not node.is_leaf_node %}
+                    <ul class="children {% if not node.is_default_open %}collapsed{% endif %}" 
+                        id="children-{{ node.category_id }}">
+                        {{ children }}
+                    </ul>
+                {% endif %}
+            </li>
+            {% endrecursetree %}
+            </ul>
+    </nav>
+</div>
+    </aside>
     <section class="post-list-section">
         <div class="search-container">
             {% if category_slug %}
@@ -54,6 +80,10 @@
                     <option value="20" {% if request.GET.per_page == '20' %}selected{% endif %}>20개</option>
                 </select>
             </form>
+            <!-- 블로그 주인에게만 포스트 작성 버튼 보이게 -->
+        {% if user == blog.blog_user %}
+            <a href="{% url 'createpost' %}" class="write-post-btn">✏️ 작성</a>
+        {% endif %}
         </div>
 
         <div class="post-list">
@@ -64,20 +94,34 @@
                         <h2>
                             <a href="{% url 'showpostdetail' post_slug=post.slug blog_slug=blog.slug %}">{{ post.post_title }}</a>
                         </h2>
-                        <div class="post-meta">
+                        <div class="post-date">
                             <span>{{ post.post_date|date:"Y년 m월 d일 H:i"}}</span>
                         </div>
                     </header>
                     <div class="post-excerpt">
-                        <p>{{ post.post_contents|safe|striptags|truncatewords:5 }}</p>
+                        <p>{{ post.post_contents|urldecode|striptags|safe|truncatechars:50 }}</p>
                     </div>
                     <a href="{% url 'showpostdetail' post_slug=post.slug blog_slug=blog.slug %}" class="read-more-link">더 보기 &rarr;</a>
+                    <div class="post-meta">
+                        <div class="meta-item">
+                            <span class="material-symbols-outlined">visibility</span>
+                            <span>{{ post.post_view_count }}</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="material-symbols-outlined">favorite</span>
+                            <span>{{ post.likes.count }}</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="material-symbols-outlined">chat_bubble</span>
+                            <span>{{ post.comments.count }}</span>
+                        </div>
+                    </div>
                 </article>
                 {% endfor %}
             {% else %}
                 {% if request.GET.q %}
                 <div class="no-posts">
-                    <h3>텅..</h3>
+                    <h3>{{ "((((；゜Д゜)))"|safe }}</h3>
                     <p>검색된 키워드로 작성된 글이 하나도 없어요 😢</p>
                 </div>
                 {% else %}
@@ -122,13 +166,7 @@
                 <span class="page-btn disabled">&gt;</span>
             {% endif %}
         </div>
-        
-        <!-- 블로그 주인에게만 포스트 작성 버튼 보이게 -->
-        {% if user == blog.blog_user %}
-            <div class="write-post-button-container">
-                <a href="{% url 'createpost' %}" class="write-post-btn">✏️ 새 글 작성</a>
-            </div>
-        {% endif %}
     </section>
 </div>
+<script src="{% static 'js/blogpage.js' %}"></script>
 {% endblock %}

@@ -43,6 +43,16 @@
 
 /* 전역 변수 정의 */
 :root {
+  /* https://sungpaks.github.io/light-mode-and-dark-mode/ */
+  /* 테마 정의 */
+  color-scheme: light dark;
+
+  --background-color: #F6F7F9;
+  --background-color-widget:white; 
+  --text-color: #333;
+  --text-special-color: #333;
+  --primary-rgb: 0, 0, 0;
+
   /* 색상 관련 변수 */
   --color-primary: #007bff;
   --color-primary-hover: #005bb5;
@@ -50,6 +60,21 @@
   --color-secondary-hover: #cfcfcf;
   --color-border: #ddd;
   --radius: 8px;
+  --color-gray-100: #262b30;
+  --color-gray-200: #343a40;
+  --color-gray-300: #383f45;
+  --color-gray-400: #495057;
+  --color-gray-500: #868e96;
+  --color-gray-600: #adb5bd;
+  --color-gray-700: #ced4da;
+  --color-gray-800: #dee2e6;
+  --color-gray-900: #e9ecef;
+  --color-gray-10: #21252a;
+  --color-background: #1c2025;
+  --color-grouped-content-background: #262b30;
+  --color-like-button: #e91e63;
+  --color-delete: #dc3545;
+  --color-delete-hover: #c82333;
 
   /* 반응형 최대 너비 변수 */
   --max-width-desktop: 1024px;
@@ -58,23 +83,50 @@
 
   /* 버튼 스타일 변수 */
   --button-radius: 25px;
+  --btn-default: #FFFFFF;
+  --btn-svg-hover: #FFA500;
 
   /* 기본 적용 폰트 */
   --basic-font: 'Pretendard', sans-serif;
 }
 
+[data-theme="dark"] {
+  --color-secondary: #383f45;
+  --color-secondary-hover: #495057;
+  --background-color: #1c2025;
+  --background-color-widget: #262b30;
+  --text-color: #e0e0e0;
+  --text-special-color: #fff;
+  --color-border: #383f45;
+  --primary-rgb: 255, 255, 255;
+
+  --btn-default: #262b30;
+  --btn-svg-hover: gold;
+}
+
 /* 기본 스타일 */
 body {
   font-family: var(--basic-font);
-  background-color: #F6F7F9;
-  color: #333;
+  background-color: var(--background-color);
+  color: var(--text-color);
   margin: 0;
   padding: 0;
+  transition: background-color 0.5s;
+}
+
+.page-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex: 1;
 }
 
 /* 레이아웃 컨테이너 */
 .container {
-  max-width: var(--max-width-desktop); /* ✅ root 변수 사용 */
+  max-width: var(--max-width-desktop);
   width: 100%;
   margin: 0 auto; /* 중앙 정렬 */
   padding: 0 1rem;
@@ -96,7 +148,7 @@ body {
 
 /* 헤더 스타일 */
 .main-header {
-  background-color: #F6F7F9;
+  background-color: var(--background-color);
   position: fixed;
   top: 0;
   width: 100%;
@@ -110,6 +162,118 @@ body {
   max-width: var(--max-width-desktop);
   margin: 0 auto;
   padding: 10px 20px;
+}
+
+.theme-toggle-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  
+  position: relative;
+  width: 40px;
+  height: 50px;
+  background-color: var(--background-color);
+  /* box-shadow: 0 4px 8px rgb(var(--primary-rgb), 0.05); */
+  border: none;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: background-color 0.5s;
+}
+
+.icon30 {
+  display: flex;
+  justify-content: center;
+  align-items: center;      
+  width: 30px;
+  height: 30px;  
+  position: absolute;
+  transition: transform 0.5s ease-in-out;
+}
+.icon30>svg{
+  transition: fill 0.5s, transform 0.5s ease;   
+}
+
+.sun {
+  display: flex;
+}
+.moon {
+  display: none;
+}
+
+:root[data-theme='dark'] .theme-toggle-button .sun {
+  display: none;
+}
+:root[data-theme='dark'] .theme-toggle-button .moon {
+  display: flex;
+}
+
+.theme-toggle-button:hover svg {
+  fill: var(--btn-svg-hover);
+  transform: scale(1.2);
+}
+
+.notif-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  width: 40px;
+}
+
+.notif-btn {
+  display: flex;
+  align-items: center;
+  vertical-align: middle;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 24px;
+  position: relative;
+
+  transition: transform 0.5s ease-in-out;
+}
+
+.notif-dot {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 8px;
+    height: 8px;
+    background-color: red;
+    border-radius: 50%;
+}
+
+.notif-btn>svg{
+  transition: fill 0.5s, transform 0.5s ease;   
+}
+
+.notif-btn:hover svg {
+  fill: var(--btn-svg-hover);
+  transform: scale(1.2);
+}
+
+.notif-popup {
+    position: absolute;
+    right: 0;
+    top: 37px;
+    width: 300px;
+    max-height: 400px;
+    overflow-y: auto;
+    border-radius: 8px;
+    background: var(--background-color-widget);
+    box-shadow: 0 4px 8px rgba(var(--primary-rgb), 0.1);
+    z-index: 1000;
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0s linear 0.3s;
+}
+
+.notif-popup.open {
+  visibility: visible;
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: 0s;
 }
 
 /* 메시지 공통 스타일 */
@@ -130,7 +294,7 @@ body {
   border-radius: 20px;
   font-size: 14px;
   color: #fff;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 6px rgba(var(--primary-rgb), 0.2);
   opacity: 0;
   animation: fadeIn 0.5s forwards, fadeOut 0.5s 3.5s forwards;
 }
@@ -168,7 +332,7 @@ body {
 .main-content {
   margin-top: 8rem;
   padding: 2rem 0;
-  max-width: var(--max-width-desktop); /* ✅ root 변수 사용 */
+  max-width: var(--max-width-desktop);
   width: 100%;
   margin-left: auto;
   margin-right: auto;
@@ -178,13 +342,21 @@ body {
 .main-footer {
   padding: 1rem 0;
   text-align: center;
-  max-width: var(--max-width-desktop); /* ✅ root 변수 사용 */
-  width: 100%;
-  margin: 0 auto;
+}
+
+.footer-container {
+  display: flex;
+  vertical-align: middle;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
 /* 네비게이션 */
 .nav-menu {
+  display: flex;
+  align-items: center;
+  gap: 12px;                 
   list-style: none;
   margin: 0;
   padding: 0;
@@ -217,11 +389,11 @@ body {
 
 /* hover 시 효과 */
 .profile-menu:hover {
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: rgba(var(--primary-rgb), 0.05);
 }
 
 .profile-menu .arrow {
-  border-top-color: #000;
+  border-top-color: var(--text-color);
 }
 
 /* ▼ 화살표 표시 */
@@ -253,13 +425,12 @@ body {
   position: absolute;
   top: 50px;
   right: 0;
-  background-color: #fff;
-  border: 1px solid #ccc;
+  background-color: var(--background-color-widget);;
   border-radius: 8px;
   list-style: none;
   padding: 8px 0;
   min-width: 150px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 8px rgba(var(--primary-rgb), 0.1);
   z-index: 1000;
   visibility: hidden;
   opacity: 0;
@@ -277,11 +448,11 @@ body {
 .dropdown-menu li a {
   display: block;
   padding: 8px 16px;
-  color: #333;
+  color: var(--text-color);;
   text-decoration: none;
 }
 
 .dropdown-menu li a:hover {
-  background-color: #f0f0f0;
+  background-color: rgba(var(--primary-rgb), 0.055);;
   border-radius: 4px;
 }
