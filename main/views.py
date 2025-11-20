@@ -77,7 +77,7 @@ def showregister(request):
                     BlogCategory.objects.create(
                         category_name="내 글",
                         category_for=blog,
-                        category_sort_order=0,
+                        category_order=0,
                         slug=slugify(unidecode("내 글")),
                         parent=None  # 최상위 카테고리면 None
                     )

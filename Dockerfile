@@ -15,11 +15,11 @@ COPY Pipfile* ./
 # --system: 컨테이너의 기본 Python 환경에 바로 설치 (가상 환경 생성 방지)
 RUN pipenv install --deploy --system
 
-# static collect
-RUN python manage.py collectstatic --noinput
-
 # 현재 Django 프로젝트 소스 코드 전체를 컨테이너 안으로 복사
 COPY . .
 
+# static collect, Django 프로젝트가 컨테이너에 위치한 후 collectstatic 실행함.
+RUN python manage.py collectstatic --noinput
+
 # 컨테이너가 시작될 때 실행될 명령어 정의 (Gunicorn) : 워커의 갯수는 일반적으로 [CPU 코어 수 × 2 + 1] 공식을 사용한다고 함.
-CMD ["gunicorn", "blog_project.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3"]
+CMD ["gunicorn", "blog_project.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3",  "--log-level", "debug", "--error-logfile", "-"]

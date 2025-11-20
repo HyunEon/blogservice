@@ -135,7 +135,7 @@ AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY', MINIO_PW)
 AWS_STORAGE_BUCKET_NAME = BUCKET_NAME
 
 # 나중에 django가 사용할 읽기/쓰기만 가진 계정을 추가해서 적용하는게 보안적으로 더 좋을 것 같다.. (postgresql도 마찬가지)
-AWS_S3_ENDPOINT_URL = 'http://127.0.0.1:9002' # 파일 업로드/관리용
+AWS_S3_ENDPOINT_URL = 'http://myminio:9000' # 파일 업로드/관리용 (django 컨테이너가 minio 컨테이너로 접근하므로 외부 포트 9002가 아닌 9000)
 
 # 2. 웹 브라우저가 접근할 외부 URL을 강제로 설정 (가장 중요!)
 AWS_S3_CUSTOM_DOMAIN = MINIO_URL
@@ -145,7 +145,7 @@ AWS_S3_OBJECT_PARAMETERS = {
 }
 AWS_S3_USE_SSL = True # HTTPS 선택 여부
 AWS_S3_SIGNATURE_VERSION = 's3v4' # S3 서명 버전
-AWS_QUERYSTRING_AUTH = False  # Signed URL 사용 안함 (개발용)
+AWS_QUERYSTRING_AUTH = True  # Signed URL 사용 안함 (개발용)
 
 STORAGES = {
     # 'default'는 FileField, ImageField 등 미디어 파일 관리를 의미합니다.
@@ -166,7 +166,7 @@ CACHES = {
         "BACKEND": "django_redis.cache.RedisCache",
         
         # Redis 연결 URL (실제 환경에 맞게 수정 필요)
-        "LOCATION": "redis://127.0.0.1:6379/1", 
+        "LOCATION": "redis://redis:6379/1", 
         # 마지막 숫자는 DB 인덱스를 의미합니다. 0은 기본 인덱스입니다.
 
         "OPTIONS": {
@@ -178,8 +178,8 @@ CACHES = {
 }
 
 # 셀러리 정의
-CELERY_BROKER_URL = 'redis://localhost:6379/0'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_BROKER_URL = 'redis://redis:6379/0'
+CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Asia/Seoul'
 
@@ -201,7 +201,7 @@ DATABASES = {
         'NAME': DB_NAME,
         'USER': DB_USER,
         'PASSWORD': DB_PW,
-        'HOST': 'localhost',
+        'HOST': 'mypostgres',
         'PORT': '5432',
     }
     # 'default': {

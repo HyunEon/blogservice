@@ -1,4 +1,4 @@
-import os, requests, datetime, random
+import os, requests, datetime, random, uuid
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
@@ -45,15 +45,10 @@ class GoogleBackend:
             try:
                 resp = requests.get(profileimg, timeout=5)
                 if resp.status_code == 200:
-                    file_name = f"{name}.jpg"
+                    file_name = f"{name}-{uuid.uuid4()}.jpg"
                     user.profile_image.save(file_name, ContentFile(resp.content), save=False)
             except Exception as e:
-                try:
-                    default_path = os.path.join(settings.MEDIA_ROOT, 'profile_images/profile_created_by_Gemini.webp')
-                    with open(default_path, 'rb') as f:
-                        user.profile_image.save(f"{name}.webp", ContentFile(f.read()), save=False)
-                except FileNotFoundError:
-                    print("기본 프로필 이미지를 찾을 수 없습니다.")
+                print("기본 프로필 이미지를 찾을 수 없습니다.")
 
             # 비밀번호 사용 불가 설정
             user.set_unusable_password()
@@ -69,7 +64,7 @@ class GoogleBackend:
             BlogCategory.objects.create(
                 category_name="내 글",
                 category_for=blog,
-                category_sort_order=0,
+                category_order=0,
                 slug=slugify(unidecode("내 글")),
                 parent=None 
             )
