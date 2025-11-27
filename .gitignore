@@ -13,5 +13,6 @@ media
 secrets.json
 logs/
 scripts/
+static/
 staticfiles/
 .env

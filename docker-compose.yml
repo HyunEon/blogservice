@@ -2,21 +2,27 @@ version: "3.9"
 
 services:
   web:
+    restart: unless-stopped
     build: .
     container_name: django_web
     depends_on:
-      - db
-      - redis
-      - minio
+      db:
+        condition: service_healthy # DB가 healthy 상태일 때까지 대기
+      redis:
+        condition: service_healthy # Redis가 healthy 상태일 때까지 대기
+      minio:
+        condition: service_healthy # MinIO가 healthy 상태일 때까지 대기
     ports:
       - "8000:8000"
     env_file:
       - .env
     volumes:
       - .:/app
-      - static_volume:/app/staticfiles
+      # Nginx가 도커 컨테이너에서 운용되지 않아, 정적 파일을 읽으려면 도커 볼륨이 아닌 호스트 서버 측에 저장해야 됨.
+      - ./static:/app/staticfiles
 
   db:
+    restart: unless-stopped
     image: postgres
     container_name: mypostgres
     environment:
@@ -27,8 +33,16 @@ services:
       - postgres_data:/var/lib/postgresql
     ports:
       - "5432:5432"
+    healthcheck:
+      # POSTGRES_USER 환경 변수 값을 사용하여 DB 상태 확인
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s       # 5초마다 확인
+      timeout: 5s        # 확인 명령어의 최대 대기 시간
+      retries: 5         # unhealthy로 간주하기 전 재시도 횟수
+      start_period: 10s  # 컨테이너 시작 후 healthcheck를 시작할 때까지의 유예 기간 (이 기간 동안의 실패는 retries에 포함되지 않음)
 
   redis:
+    restart: unless-stopped
     image: redis
     container_name: myredis
     ports:
@@ -36,8 +50,26 @@ services:
     volumes:
       - redis_data:/data
     command: ["redis-server", "--appendonly", "yes"]
+    healthcheck:
+      # redis-cli로 PING 명령을 보내고 응답을 확인
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 1s
+      timeout: 3s
+      retries: 30
+      start_period: 5s
+
+  celery:
+    restart: unless-stopped
+    build: .
+    command: celery -A blog_project worker -l info
+    volumes:
+      - .:/app
+    depends_on:
+      - redis
+      - db
 
   minio:
+    restart: unless-stopped
     image: quay.io/minio/minio
     container_name: myminio
     environment:
@@ -50,10 +82,22 @@ services:
     volumes:
       - minio_data:/data
       - minio_config:/root/.minio
+    healthcheck:
+      # MinIO의 health endpoint에 curl 요청
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
 
 volumes:
-  postgres_data:
-  redis_data:
   minio_data:
+    name: blogservice_minio_data
   minio_config:
+    name: blogservice_minio_config
+  postgres_data:
+    name: blogservice_postgres_data
+  redis_data:
+    name: blogservice_redis_data
   static_volume:
+    name: blogservice_static_volume

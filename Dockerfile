@@ -22,4 +22,4 @@ COPY . .
 RUN python manage.py collectstatic --noinput
 
 # 컨테이너가 시작될 때 실행될 명령어 정의 (Gunicorn) : 워커의 갯수는 일반적으로 [CPU 코어 수 × 2 + 1] 공식을 사용한다고 함.
-CMD ["gunicorn", "blog_project.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3",  "--log-level", "debug", "--error-logfile", "-"]
+CMD ["gunicorn", "blog_project.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3",  "--log-level", "debug", "--error-logfile", "-"]  
