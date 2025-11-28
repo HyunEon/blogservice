@@ -21,8 +21,7 @@
 - Docker Compose를 활용한 다중 Docker 컨테이너 관리 및 배포를 경험했습니다.
 - 비동기 작업을 구현해보며 비동기 환경의 기본 지식과 왜 필요한 지를 직접 경험했습니다.
 - Nginx를 통해 리버스 프록시를 직접 구성해보며, 구조에 대해 이해했습니다.
-- 배포 및 cloudflare에서 도메인을 직접 구입해서 호스팅까지 진행해보며, 실제 운용 가능한 웹 앱 구축을 경험했습니다.
-- 
+- 온 프레미스 배포 및 cloudflare에서 도메인을 직접 구입해서 호스팅까지 진행해보며, 운용 가능한 웹 앱 구축을 경험했습니다.
 
 ## ❓ 더 개선할 점은 무엇인가?
 > 블로그에도 앞으로 고쳐나가야 할 Todo를 체크 리스트로 게시함.
@@ -51,6 +50,7 @@
 - Apple Silicon Arm64 기반 M1 Mac Mini
 
 ## 시스템 아키텍처
+<img width="1060" height="513" alt="시스템-아키텍쳐" src="https://github.com/user-attachments/assets/6b1f7c00-c618-4dcd-9d01-98c107e28a3d" />
 
 ## 🎯 왜 Django인가?
 - Instargram, Pinterest 등 글로벌 기업에서 Django를 활용한 서비스를 제공했었다는 점에서 왜 그랬는지 궁금했었고, Django의 대표적인 특징인 빠른 서비스 빌드와, 웹 앱을 위한 수 많은 편리한 기능(미들웨어, 인증, ORM, 어드민 기능 등..) 및 강력한 보안 기능을 자체적으로 제공하여 개발자는 이를 선택하여 간편하게 기능을 구현할 수 있다는 점이 1인 프로젝트를 구상 중인 저에게는 매우 매력적으로 들렸습니다.
@@ -67,12 +67,38 @@
 > 현재 1차로 목표했던 항목들은 전부 구현이 완료됨.
 
 ## 🚀 주요 기능 미리보기
-### 포스트 리스트 
-- (스크린샷 이미지)
-### 포스트 상세 
-- (스크린샷 이미지)
-### 포스트 작성 
-- (스크린샷 이미지)
+### 로그인
+<img width="2560" height="1263" alt="스크린샷 2025-11-27 215417" src="https://github.com/user-attachments/assets/5b2cc79a-fff0-419b-969e-9b1d0f5a5883" />
+
+### 회원가입
+<img width="2560" height="1267" alt="스크린샷 2025-11-27 215423" src="https://github.com/user-attachments/assets/27920d7d-8fc9-4588-ab69-94539a4a1ce6" />
+
+### 메인 페이지
+<img width="2560" height="1259" alt="스크린샷 2025-11-27 215043" src="https://github.com/user-attachments/assets/68546bf0-3574-4ca8-b47a-458c2b686865" />
+
+### 다크 모드
+<img width="2560" height="1265" alt="스크린샷 2025-11-27 215311" src="https://github.com/user-attachments/assets/e2992ece-aa90-4d8f-adb6-851dcbeb3ade" />
+
+### 블로그 페이지 
+<img width="2560" height="1267" alt="스크린샷 2025-11-27 215327" src="https://github.com/user-attachments/assets/6c0c1dbf-eb12-4ee8-9c83-844682b3e655" />
+
+### 포스트 상세
+<img width="2560" height="1265" alt="스크린샷 2025-11-27 215223" src="https://github.com/user-attachments/assets/25c6fca8-2e5b-4adc-a465-b75241f60859" />
+
+### 좋아요/댓글 리스트
+<img width="2560" height="1265" alt="스크린샷 2025-11-27 220427" src="https://github.com/user-attachments/assets/de855bf8-48fb-4ea2-a706-f2ee48e5c44f" />
+
+### 포스트 작성(수정)
+<img width="2560" height="1263" alt="스크린샷 2025-11-27 215231" src="https://github.com/user-attachments/assets/a5feb2d6-b134-4e25-b30d-471fd3e459c3" />
+
+### 프로필 설정
+<img width="2560" height="1267" alt="스크린샷 2025-11-27 215347" src="https://github.com/user-attachments/assets/2df8f52e-128f-4735-8c76-6d965688b5ae" />
+
+### 카테고리 설정
+<img width="2560" height="1269" alt="스크린샷 2025-11-27 215355" src="https://github.com/user-attachments/assets/ed8b86f5-00db-4168-a6a7-19145a06f56f" />
+
+### 블로그 설정
+<img width="2560" height="1271" alt="스크린샷 2025-11-27 215403" src="https://github.com/user-attachments/assets/b759c3b2-bc22-49ae-abce-15795e6ac005" />
 
 ## ⚙️ 설치 및 실행
 ```
