@@ -1,6 +1,10 @@
 # Created by https://www.toptal.com/developers/gitignore/api/django
 # Edit at https://www.toptal.com/developers/gitignore?templates=django
 
+# 환경 관련
+Pipfile
+.venv/
+
 ### Django ###
 *.log
 *.pot
@@ -16,3 +20,5 @@ scripts/
 static/
 staticfiles/
 .env
+
+pg_backup/

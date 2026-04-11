@@ -45,6 +45,10 @@ services:
     restart: unless-stopped
     image: redis
     container_name: myredis
+    build: .
+    # Celery 환경에서도 Django 설정이 필요하므로 env_file 추가 필수
+    env_file:
+      - .env
     ports:
       - "6379:6379"
     volumes:

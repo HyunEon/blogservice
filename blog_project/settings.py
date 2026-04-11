@@ -13,6 +13,10 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 import os, json
 from django.core.exceptions import ImproperlyConfigured
+from dotenv import load_dotenv
+
+# 환경 변수 로드
+load_dotenv()
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -22,19 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 
-secret_file = os.path.join(BASE_DIR, 'secrets.json')
-
-with open(secret_file) as f:
-    secrets = json.loads(f.read())
-
-def get_secret(setting, secrets=secrets):
-    try:
-        return secrets[setting]
-    except KeyError:
-        error_msg = "Set the {} environment variable".format(setting)
-        raise ImproperlyConfigured(error_msg)
-
-SECRET_KEY = get_secret("SECRET_KEY")
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
@@ -42,7 +34,7 @@ DEBUG = False
 ALLOWED_HOSTS = ['*']
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://blog.hyuneon.org",
+    os.getenv("HOST_ADDRESS", "https://blog.hyuneon.org"),
 ]
 
 # 로그인 페이지 기본 URL
@@ -121,21 +113,20 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'blog_project.wsgi.application'
 
-MINIO_CONFIG = get_secret("MINIO_CONFIG")
 try:
-    BUCKET_NAME = MINIO_CONFIG["NAME"]
-    MINIO_USER = MINIO_CONFIG["USER"]
-    MINIO_PW = MINIO_CONFIG["PASSWORD"]
-    MINIO_URL = MINIO_CONFIG["URL"]
+    BUCKET_NAME = os.getenv("MINIO_NAME")
+    MINIO_USER = os.getenv("MINIO_ROOT_USER")
+    MINIO_PW = os.getenv("MINIO_ROOT_PASSWORD")
+    MINIO_URL = os.getenv("MINIO_URL")
 except KeyError as e:
-    raise ImproperlyConfigured(f"Missing MINIO_CONFIG key in secrets.json: {e}")
+    raise ImproperlyConfigured(f"Missing MINIO_CONFIG in dotenv: {e}")
 
 AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID', MINIO_USER)
 AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY', MINIO_PW)
 AWS_STORAGE_BUCKET_NAME = BUCKET_NAME
 
 # 나중에 django가 사용할 읽기/쓰기만 가진 계정을 추가해서 적용하는게 보안적으로 더 좋을 것 같다.. (postgresql도 마찬가지)
-AWS_S3_ENDPOINT_URL = 'http://myminio:9000' # 파일 업로드/관리용 (django 컨테이너가 minio 컨테이너로 접근하므로 외부 포트 9002가 아닌 9000)
+AWS_S3_ENDPOINT_URL = os.getenv("MINIO_ENDPOINT") # 파일 업로드/관리용 (django 컨테이너가 minio 컨테이너로 접근하므로 외부 포트 9002가 아닌 9000)
 
 # 2. 웹 브라우저가 접근할 외부 URL을 강제로 설정 (가장 중요!)
 AWS_S3_CUSTOM_DOMAIN = MINIO_URL
@@ -166,7 +157,7 @@ CACHES = {
         "BACKEND": "django_redis.cache.RedisCache",
         
         # Redis 연결 URL (실제 환경에 맞게 수정 필요)
-        "LOCATION": "redis://redis:6379/1", 
+        "LOCATION": os.getenv('REDIS_LOCATION'), 
         # 마지막 숫자는 DB 인덱스를 의미합니다. 0은 기본 인덱스입니다.
 
         "OPTIONS": {
@@ -178,22 +169,22 @@ CACHES = {
 }
 
 # 셀러리 정의
-CELERY_BROKER_URL = 'redis://redis:6379/0'
-CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
-CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TIMEZONE = 'Asia/Seoul'
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL")
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND")
+CELERY_RESULT_SERIALIZER = os.getenv("CELERY_RESULT_SERIALIZER")
+CELERY_TIMEZONE = os.getenv("CELERY_TIMEZONE", "Asia/Seoul")
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-# 데이터베이스 설정은 django secret 키와 같이 별도의 설정 파일로 관리
-DB_CONFIG = get_secret("DB_CONFIG")
 try:
-    DB_NAME = DB_CONFIG["NAME"]
-    DB_USER = DB_CONFIG["USER"]
-    DB_PW = DB_CONFIG["PASSWORD"]
+    DB_NAME = os.getenv("POSTGRES_DB")
+    DB_USER = os.getenv("POSTGRES_USER")
+    DB_PW = os.getenv("POSTGRES_PASSWORD")
+    DB_HOST = os.getenv("POSTGRES_HOST")
+    DB_PORT = os.getenv("POSTGRES_PORT")
 except KeyError as e:
-    raise ImproperlyConfigured(f"Missing DB_CONFIG key in secrets.json: {e}")
+    raise ImproperlyConfigured(f"Missing DB_CONFIG key in dotenv: {e}")
 
 DATABASES = {
     'default': {
@@ -201,8 +192,8 @@ DATABASES = {
         'NAME': DB_NAME,
         'USER': DB_USER,
         'PASSWORD': DB_PW,
-        'HOST': 'mypostgres',
-        'PORT': '5432',
+        'HOST': DB_HOST,
+        'PORT': DB_PORT,
     }
     # 'default': {
     #     'ENGINE': 'django.db.backends.sqlite3',
@@ -239,12 +230,12 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 # 클라우드플레어 턴 스타일 사이트 키
-TURNSTILE_SITE_KEY = get_secret("TURNSTILE_SITE_KEY")
+TURNSTILE_SITE_KEY = os.getenv("TURNSTILE_SITE_KEY")
 # 턴 사이트 시크릿 키
-TURNSTILE_SECRET_KEY = get_secret("TURNSTILE_SECRET_KEY")
+TURNSTILE_SECRET_KEY = os.getenv("TURNSTILE_SECRET_KEY")
 
 # Google 클라이언트 키
-GOOGLE_CLIENT_ID = get_secret("GOOGLE_CLIENT_ID")
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/

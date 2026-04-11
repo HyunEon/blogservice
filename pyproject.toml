@@ -1,0 +1,33 @@
+[project]
+name = "blogservice"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "django-session-timeout",
+    "pillow",
+    "django-ckeditor-5",
+    "unidecode",
+    "psycopg[binary]",
+    "psycopg2-binary",
+    "django",
+    "django-auth",
+    "jwt",
+    "google-auth",
+    "requests",
+    "django-storages",
+    "whitenoise",
+    "minio",
+    "fastapi",
+    "uvicorn",
+    "python-multipart",
+    "boto3",
+    "beautifulsoup4",
+    "celery",
+    "redis",
+    "django-mptt",
+    "django-redis",
+    "gunicorn",
+    "dotenv>=0.9.9",
+]
